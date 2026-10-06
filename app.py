@@ -318,7 +318,7 @@ with tab_designer:
                 html += f'<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; transform: {"translateY(" + str(y_offset) + "px)" if side == 1 else "none"};">'
 
                 for el in layout["elements"]:
-                    txt = el.get("text") or live.get(el["id"], "")
+                    txt = str(live[el["id"]] if el["id"] in live else el.get("text", el["id"]))
                     if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
 
                     if el["type"] == "text":
@@ -328,16 +328,14 @@ with tab_designer:
                         w = w_map.get(str(el.get("font", "2")), 12)
                         align = el.get("align", "left")
 
-                        
-                            lines = []
-                            for segment in str(txt).split("
-"):
-                                if el.get("wrapWidth"):
-                                    lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
-                                else:
-                                    lines.append(segment)
-                                    
-                            for i, line in enumerate(lines):
+                        lines = []
+                        for segment in str(txt).split("\n"):
+                            if el.get("wrapWidth"):
+                                import textwrap
+                                lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
+                            else:
+                                lines.append(segment)
+                        for i, line in enumerate(lines):
                             if line.strip():
                                 line_width = len(line.strip()) * w
                                 x_adj = 0
@@ -430,15 +428,13 @@ with tab_designer:
                             line_height = char_h + 4
                             align = el.get("align", "left")
 
-                            
                             lines = []
-                            for segment in str(txt).split("
-"):
+                            for segment in str(txt).split("\n"):
                                 if el.get("wrapWidth"):
+                                    import textwrap
                                     lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
                                 else:
                                     lines.append(segment)
-                                    
                             for i, line in enumerate(lines):
                                 if line.strip():
                                     line_width = len(line.strip()) * char_w
@@ -551,16 +547,14 @@ with tab_batch:
                                         line_height = char_h + 4
                                         align = el.get("align", "left")
                                         
-                                        
-                            lines = []
-                            for segment in str(txt).split("
-"):
-                                if el.get("wrapWidth"):
-                                    lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
-                                else:
-                                    lines.append(segment)
-                                    
-                            for i, line in enumerate(lines):
+                                        lines = []
+                                        for segment in str(txt).split("\n"):
+                                            if el.get("wrapWidth"):
+                                                import textwrap
+                                                lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
+                                            else:
+                                                lines.append(segment)
+                                        for i, line in enumerate(lines):
                                             if line.strip():
                                                 line_width = len(line.strip()) * char_w
                                                 x_adj = 0
