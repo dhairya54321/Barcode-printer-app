@@ -1967,122 +1967,101 @@
                 "id": "ProductName",
                 "type": "text",
                 "x": 10,
-                "y": 20,
-                "font": "3"
+                "y": 10,
+                "font": "5"
             },
             {
                 "id": "NetWeight",
                 "type": "text",
                 "x": 10,
-                "y": 60,
-                "font": "2"
+                "y": 70,
+                "font": "3"
             },
             {
                 "id": "MRP",
                 "type": "text",
-                "x": 180,
-                "y": 60,
-                "font": "2"
+                "x": 10,
+                "y": 110,
+                "font": "3"
             },
             {
                 "id": "MfgDateTitle",
                 "type": "text",
                 "x": 10,
-                "y": 90,
-                "font": "1"
+                "y": 150,
+                "font": "3"
             },
             {
-                "id": "MfgDate",
+                "id": "BestBeforeTitle",
                 "type": "text",
                 "x": 10,
-                "y": 110,
-                "font": "2"
+                "y": 190,
+                "font": "3"
+            },
+            {
+                "id": "Batch",
+                "type": "text",
+                "x": 10,
+                "y": 230,
+                "font": "3"
             },
             {
                 "id": "IngredientsTitle",
                 "type": "text",
                 "x": 10,
-                "y": 150,
-                "font": "2"
+                "y": 270,
+                "font": "3"
             },
             {
                 "id": "IngredientsText",
                 "type": "text",
                 "x": 10,
-                "y": 180,
-                "font": "1"
+                "y": 300,
+                "font": "2"
             },
             {
                 "id": "NutritionTitle",
                 "type": "text",
                 "x": 10,
-                "y": 280,
-                "font": "2"
+                "y": 370,
+                "font": "3"
             },
             {
                 "id": "NutritionCol1",
                 "type": "text",
-                "x": 10,
-                "y": 310,
-                "font": "1"
+                "x": 20,
+                "y": 410,
+                "font": "2"
             },
             {
                 "id": "NutritionCol2",
                 "type": "text",
-                "x": 180,
-                "y": 310,
-                "font": "1"
+                "x": 200,
+                "y": 410,
+                "font": "2"
             },
             {
                 "id": "Barcode",
                 "type": "barcode",
-                "x": 10,
-                "y": 420,
-                "height": 70,
+                "x": 100,
+                "y": 480,
+                "height": 60,
                 "thickness": 2,
                 "rotation": 0
-            },
-            {
-                "id": "BestBeforeTitle",
-                "type": "text",
-                "x": 220,
-                "y": 410,
-                "font": "1"
-            },
-            {
-                "id": "BestBeforeDate",
-                "type": "text",
-                "x": 220,
-                "y": 430,
-                "font": "2"
-            },
-            {
-                "id": "Batch",
-                "type": "text",
-                "x": 220,
-                "y": 460,
-                "font": "2"
             },
             {
                 "id": "ShopName1",
                 "type": "text",
                 "x": 10,
-                "y": 520,
-                "font": "2"
-            },
-            {
-                "id": "ShopName2",
-                "type": "text",
-                "x": 10,
                 "y": 550,
-                "font": "2"
+                "font": "3"
             },
             {
                 "id": "Address",
                 "type": "text",
-                "x": 10,
-                "y": 580,
-                "font": "1"
+                "x": 20,
+                "y": 575,
+                "font": "3"
             }
         ]
     }

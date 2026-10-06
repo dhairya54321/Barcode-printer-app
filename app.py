@@ -5,8 +5,10 @@ from datetime import datetime, timedelta
 import os
 import subprocess
 import json
+import textwrap
 
 import json
+import textwrap
 import streamlit.components.v1 as components
 
 if not os.path.exists('product_details.json'):
@@ -87,6 +89,7 @@ def open_editor(base_name, current_item, orient, layout_data, live_data):
     if result is not None:
         try:
             import json
+import textwrap
             with open('presets.json', 'r') as f:
                 current_presets = json.load(f)
             
@@ -218,14 +221,38 @@ with tab_designer:
         if selected_orient == "Full Label":
             mfg_date_input = st.text_input("Mfg Date", value=saved_details.get("MfgDate", datetime.now().strftime("%d-%b-%Y").upper()))
             
-            # Smart auto-guess
-            default_ingredients = "Gram Flour, Edible Vegetable Oil, Salt, Spices & Condiments."
-            if "bhakarwadi" in default_name.lower():
-                default_ingredients = "Gram flour, Wheat flour, Edible oil, Sugar, Sesame seeds, Spices, Salt, Condiments."
-            elif "chikki" in default_name.lower():
-                default_ingredients = "Peanuts, Jaggery, Liquid glucose, Cardamom."
-            elif "sev" in default_name.lower():
-                default_ingredients = "Gram Flour, Edible Vegetable Oil, Salt, Ajwain, Spices."
+            import textwrap
+            
+            # Massive commercial Farsan dictionary
+            farsan_dict = {
+                "bhakarwadi": "Refined Wheat Flour (Maida), Gram Flour (Besan), Edible Vegetable Oil (Palmolein/Cottonseed), Sugar, Tamarind Paste, Spices & Condiments (Coriander, Cumin, Fennel, Cloves, Cinnamon, Black Pepper), Iodized Salt, Sesame Seeds, Coconut Powder, Citric Acid.",
+                "chikki": "Roasted Peanuts, Jaggery (Gur), Sugar, Liquid Glucose, Cardamom, Edible Vegetable Oil.",
+                "sev": "Gram Flour (Besan), Edible Vegetable Oil (Palmolein), Iodized Salt, Ajwain, Black Pepper, Spices & Condiments.",
+                "fafda": "Gram Flour (Besan), Edible Vegetable Oil (Palmolein), Papadh Khar (Alkaline Salt), Iodized Salt, Carom Seeds (Ajwain), Black Pepper.",
+                "dhokla": "Gram Flour (Besan), Semolina (Rava), Curd, Edible Vegetable Oil, Sugar, Iodized Salt, Green Chilli, Ginger, Mustard Seeds, Curry Leaves, Citric Acid, Baking Soda.",
+                "khandvi": "Gram Flour (Besan), Buttermilk, Green Chilli, Ginger, Iodized Salt, Turmeric Powder, Mustard Seeds, Curry Leaves, Edible Vegetable Oil, Fresh Coriander, Coconut.",
+                "gathiya": "Gram Flour (Besan), Edible Vegetable Oil (Palmolein), Iodized Salt, Carom Seeds (Ajwain), Black Pepper, Papadh Khar.",
+                "mathri": "Refined Wheat Flour (Maida), Edible Vegetable Oil, Carom Seeds (Ajwain), Cumin Seeds, Black Pepper, Iodized Salt, Fenugreek Leaves (Kasuri Methi).",
+                "chakli": "Rice Flour, Gram Flour (Besan), Urad Dal Flour, Edible Vegetable Oil, Sesame Seeds, Cumin Seeds, Red Chilli Powder, Asafoetida (Hing), Iodized Salt.",
+                "chiwda": "Flattened Rice (Poha), Edible Vegetable Oil, Roasted Peanuts, Roasted Gram (Dalia), Curry Leaves, Green Chilli, Mustard Seeds, Cumin Seeds, Turmeric Powder, Sugar, Iodized Salt, Raisins, Cashews.",
+                "khaman": "Gram Flour (Besan), Edible Vegetable Oil, Sugar, Iodized Salt, Citric Acid, Baking Soda, Mustard Seeds, Green Chilli, Curry Leaves.",
+                "patra": "Colocasia Leaves (Arbi Ke Patte), Gram Flour (Besan), Jaggery, Tamarind Paste, Edible Vegetable Oil, Spices & Condiments (Coriander, Cumin, Red Chilli), Sesame Seeds, Iodized Salt.",
+                "kachori": "Refined Wheat Flour (Maida), Moong Dal/Urad Dal, Edible Vegetable Oil (Palmolein), Gram Flour (Besan), Sugar, Spices & Condiments (Fennel, Coriander, Cumin, Black Pepper, Garam Masala), Iodized Salt, Tamarind, Citric Acid.",
+                "samosa": "Refined Wheat Flour (Maida), Potatoes, Green Peas, Edible Vegetable Oil, Spices & Condiments (Cumin, Coriander, Garam Masala, Red Chilli, Amchur), Green Chilli, Ginger, Iodized Salt.",
+                "namak pare": "Refined Wheat Flour (Maida), Edible Vegetable Oil, Carom Seeds (Ajwain), Cumin Seeds, Iodized Salt.",
+                "shakarpara": "Refined Wheat Flour (Maida), Sugar/Jaggery, Edible Vegetable Oil, Clarified Butter (Ghee), Cardamom Powder.",
+                "laddu": "Gram Flour (Besan) / Wheat Flour, Clarified Butter (Ghee), Sugar/Jaggery, Almonds, Cashews, Pistachios, Cardamom Powder.",
+                "barfi": "Milk Solids (Mawa/Khoya), Sugar, Clarified Butter (Ghee), Cardamom Powder, Nuts (Almonds, Pistachios), Silver Leaves (Vark).",
+                "peda": "Milk Solids (Mawa/Khoya), Sugar, Cardamom Powder, Saffron, Pistachios.",
+                "jalebi": "Refined Wheat Flour (Maida), Sugar, Edible Vegetable Oil / Ghee, Curd, Saffron, Cardamom Powder, Baking Powder."
+            }
+            
+            default_ingredients = "Gram Flour (Besan), Edible Vegetable Oil (Palmolein), Iodized Salt, Spices & Condiments."
+            nm = default_name.lower()
+            for key, val in farsan_dict.items():
+                if key in nm:
+                    default_ingredients = val
+                    break
                 
             ingredients_input = st.text_area("Ingredients", value=saved_details.get("Ingredients", default_ingredients), height=100)
             
@@ -256,16 +283,32 @@ with tab_designer:
             "NetWeight": f"Net wt: {weight_input}" if not weight_input.startswith("Net wt") else weight_input,
             "MRP": mrp_input,
             "Batch": f"Batch: {batch_input}" if not batch_input.startswith("Batch") else batch_input,
+            "BestBeforeTitle": f"Expiry Date: {expiry_date_input}" if selected_orient == "Full Label" else "Expiry Date:",
+            "BestBeforeDate": "" if selected_orient == "Full Label" else expiry_date_input,
+            "Barcode": barcode_input,
+            "ShopName1": "Shree Jayshakti Farsan Mart" if selected_orient == "Full Label" else "Shree Jayshakti",
+            "ShopName2": "" if selected_orient == "Full Label" else "Farsan Mart",
+            "Address": "Ahmedabadi pole, Raopura.",
+            "MfgDateTitle": f"Mfg Date: {mfg_date_input}" if selected_orient == "Full Label" else "",
+            "IngredientsTitle": "Ingredients:",
+            "IngredientsText": "\n".join(textwrap.wrap(ingredients_input, width=32)) if selected_orient == "Full Label" else ingredients_input,
+            "NutritionTitle": "Nutritional Facts (per 100g):",
+            "NutritionCol1": nutrition_col1,
+            "NutritionCol2": nutrition_col2
+        }" if not weight_input.startswith("Net wt") else weight_input,
+            "MRP": mrp_input,
+            "Batch": f"Batch: {batch_input}" if not batch_input.startswith("Batch") else batch_input,
             "BestBeforeTitle": "Expiry Date:",
             "BestBeforeDate": expiry_date_input,
             "Barcode": barcode_input,
             "ShopName1": "Shree Jayshakti",
             "ShopName2": "Farsan Mart",
             "Address": "Ahmedabadi pole, Raopura.",
-            "MfgDateTitle": "Mfg Date:",
-            "MfgDate": mfg_date_input,
+            "MfgDateTitle": f"Mfg Date: {mfg_date_input}",
+            "BestBeforeTitle": f"Expiry Date: {expiry_date_input}",
+            "ShopName1": "Shree Jayshakti Farsan Mart",
             "IngredientsTitle": "Ingredients:",
-            "IngredientsText": ingredients_input,
+            "IngredientsText": "\n".join(textwrap.wrap(ingredients_input, width=32)) if selected_orient == "Full Label" else ingredients_input,
             "NutritionTitle": "Nutritional Facts (per 100g):",
             "NutritionCol1": nutrition_col1,
             "NutritionCol2": nutrition_col2
