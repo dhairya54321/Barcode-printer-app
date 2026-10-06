@@ -246,31 +246,71 @@ with tab_designer:
                 "jalebi": "Refined Wheat Flour (Maida), Sugar, Edible Vegetable Oil / Ghee, Curd, Saffron, Cardamom Powder, Baking Powder."
             }
             
-            default_ingredients = "Gram Flour (Besan), Edible Vegetable Oil (Palmolein), Iodized Salt, Spices & Condiments."
-            nm = default_name.lower()
-            
-            # Smart spelling matching logic
-            import re
+            nm = default_name.lower().strip()
             nm_clean = re.sub(r'[^a-z]', '', nm)
             
-            for key, val in farsan_dict.items():
-                # Exact match
-                if key in nm:
-                    default_ingredients = val
-                    break
-                # Common misspellings handler
-                if key == "bhakarwadi" and ("bhakarwadi" in nm or "bhakharwadi" in nm or "bakharwadi" in nm):
-                    default_ingredients = val
-                    break
-                if key == "chikki" and ("chiki" in nm or "chikki" in nm):
-                    default_ingredients = val
-                    break
-                # Remove h's and check again to catch misspellings
-                key_no_h = key.replace('h', '')
-                nm_no_h = nm_clean.replace('h', '')
-                if key_no_h in nm_no_h:
-                    default_ingredients = val
-                    break
+            nm = default_name.lower().strip()
+            nm_clean = re.sub(r'[^a-z]', '', nm)
+            
+            default_ingredients = "Gram Flour (Besan), Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, Spices & Condiments."
+            
+            if "yellow wafer" in nm or "keda wafer" in nm or "banana" in nm:
+                default_ingredients = "Raw Banana, Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, Black Pepper, Spices & Condiments."
+            elif "wafer" in nm or "potato" in nm or "aaloo" in nm:
+                default_ingredients = "Potatoes, Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, Spices & Condiments."
+            elif "bhakarwadi" in nm_clean or "bakarwadi" in nm_clean or "bhakharwadi" in nm_clean:
+                default_ingredients = "Refined Wheat Flour (Maida), Gram Flour (Besan), Edible Vegetable Oil (Cottonseed Oil), Sugar, Tamarind Paste, Spices & Condiments (Coriander, Cumin, Fennel, Cloves, Cinnamon, Black Pepper), Iodized Salt, Sesame Seeds, Coconut Powder, Citric Acid."
+            elif "farali" in nm and "chevdo" in nm:
+                default_ingredients = "Potatoes, Peanuts, Edible Vegetable Oil (Cottonseed Oil), Sugar, Iodized Salt, Spices, Raisins, Cashews, Curry Leaves."
+            elif "lilo chevdo" in nm or "lilo suko" in nm:
+                default_ingredients = "Potatoes, Gram Flour (Besan), Edible Vegetable Oil (Cottonseed Oil), Sugar, Green Chilli, Ginger, Raisins, Cashews, Sesame Seeds, Iodized Salt, Spices & Condiments."
+            elif "makai chevdo" in nm or "makai" in nm:
+                default_ingredients = "Corn Flakes (Makai Poha), Peanuts, Gram Flour (Besan), Edible Vegetable Oil (Cottonseed Oil), Sugar, Spices & Condiments, Iodized Salt."
+            elif "chevdo" in nm or "chavanu" in nm or "bhel" in nm or "mix" in nm or "dalmuth" in nm:
+                default_ingredients = "Flattened Rice (Poha), Gram Flour (Besan), Peanuts, Roasted Gram (Dalia), Edible Vegetable Oil (Cottonseed Oil), Sugar, Iodized Salt, Spices & Condiments, Curry Leaves."
+            elif "sev" in nm or "gathiya" in nm or "fafda" in nm or "papdi" in nm or "chorafali" in nm:
+                flavors = ""
+                if "tomato" in nm: flavors = "Tomato Powder, "
+                elif "cheese" in nm: flavors = "Cheese Powder, "
+                elif "palak" in nm: flavors = "Spinach (Palak) Paste, "
+                elif "limbu" in nm: flavors = "Lemon Extract, Black Pepper, "
+                elif "lasan" in nm or "garlic" in nm: flavors = "Garlic Paste, "
+                elif "fudina" in nm: flavors = "Mint (Fudina) Leaves, "
+                elif "tikhi" in nm: flavors = "Extra Red Chilli Powder, "
+                elif "mari" in nm: flavors = "Black Pepper, "
+                default_ingredients = f"Gram Flour (Besan), Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, {flavors}Carom Seeds (Ajwain), Papadh Khar (Alkaline Salt), Spices & Condiments."
+            elif "chakri" in nm_clean or "chakli" in nm_clean:
+                default_ingredients = "Rice Flour, Gram Flour (Besan), Urad Dal Flour, Edible Vegetable Oil (Cottonseed Oil), Sesame Seeds, Cumin Seeds, Red Chilli Powder, Asafoetida (Hing), Iodized Salt."
+            elif "mathiya" in nm:
+                default_ingredients = "Dew Bean Flour (Moth Dal), Urad Dal Flour, Edible Vegetable Oil (Cottonseed Oil), Sugar, Iodized Salt, Ajwain, White Pepper Powder, Chilli Powder."
+            elif "farsipuri" in nm or "sandwich puri" in nm or "mathri" in nm:
+                default_ingredients = "Refined Wheat Flour (Maida), Edible Vegetable Oil (Cottonseed Oil), Clarified Butter (Ghee), Cumin Seeds, Black Pepper, Iodized Salt."
+            elif "sakkarpara" in nm or "shakarpara" in nm:
+                default_ingredients = "Refined Wheat Flour (Maida), Sugar, Edible Vegetable Oil (Cottonseed Oil), Clarified Butter (Ghee), Cardamom Powder."
+            elif "methipara" in nm or "methipuri" in nm or "methi" in nm:
+                default_ingredients = "Refined Wheat Flour (Maida), Gram Flour (Besan), Fenugreek Leaves (Kasuri Methi), Edible Vegetable Oil (Cottonseed Oil), Spices & Condiments, Iodized Salt."
+            elif "bundi" in nm:
+                default_ingredients = "Gram Flour (Besan), Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, Spices & Condiments."
+            elif "sing bhujiya" in nm or "masala sing" in nm or "khari sing" in nm:
+                default_ingredients = "Peanuts, Gram Flour (Besan), Edible Vegetable Oil (Cottonseed Oil), Spices & Condiments (Red Chilli, Cumin, Garam Masala), Iodized Salt."
+            elif "dal" in nm or "moong" in nm or "chanajor" in nm or "moongjor" in nm:
+                default_ingredients = "Split Bengal Gram / Green Gram, Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, Mango Powder (Amchur), Spices & Condiments."
+            elif "chiki" in nm_clean or "chikki" in nm_clean:
+                default_ingredients = "Roasted Peanuts / Sesame Seeds, Jaggery (Gur), Sugar, Liquid Glucose, Cardamom, Edible Vegetable Oil (Cottonseed Oil)."
+            elif "sonpapdi" in nm or "soan papdi" in nm:
+                default_ingredients = "Sugar, Gram Flour (Besan), Refined Wheat Flour (Maida), Clarified Butter (Ghee), Edible Vegetable Oil (Cottonseed Oil), Almonds, Pistachios, Cardamom."
+            elif "jalebi" in nm:
+                default_ingredients = "Refined Wheat Flour (Maida), Sugar, Edible Vegetable Oil (Cottonseed Oil) / Ghee, Curd, Saffron, Cardamom Powder, Baking Powder."
+            elif "panipuri" in nm:
+                default_ingredients = "Refined Wheat Flour (Maida), Semolina (Rava), Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, Baking Soda."
+            elif "samosa" in nm or "kachori" in nm:
+                default_ingredients = "Refined Wheat Flour (Maida), Moong Dal / Potatoes, Edible Vegetable Oil (Cottonseed Oil), Sugar, Spices & Condiments, Iodized Salt, Tamarind."
+            elif "undhiyu" in nm:
+                default_ingredients = "Mixed Vegetables (Surti Papdi, Purple Yam, Sweet Potato, Banana, Brinjal, Potato), Edible Vegetable Oil (Cottonseed Oil), Gram Flour (Besan), Fresh Coconut, Coriander, Green Chilli, Ginger, Garlic, Spices, Iodized Salt."
+            elif "kh" in nm.split():
+                default_ingredients = "Whole Wheat Flour, Edible Vegetable Oil (Cottonseed Oil), Iodized Salt, Spices & Condiments."
+
+
                 
             ingredients_input = st.text_area("Ingredients", value=saved_details.get("Ingredients", default_ingredients), height=100)
             
