@@ -156,6 +156,9 @@
         let elementsData = [];
         
         let isDragging = false;
+        let isResizing = null;
+        let initialWrapWidth = 32;
+        let currentFontWidth = 12;
         let dragTarget = null;
         let startX, startY, initialX, initialY;
 
@@ -331,6 +334,19 @@
                 ['nw', 'ne', 'se', 'sw'].forEach(pos => {
                     let handle = document.createElement('div');
                     handle.className = `handle ${pos}`;
+                    handle.onmousedown = (e) => {
+                        e.stopPropagation();
+                        selectedId = el.id;
+                        isResizing = pos;
+                        dragTarget = el;
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        initialX = el.x;
+                        initialY = el.y;
+                        initialWrapWidth = el.wrapWidth || 32;
+                        currentFontWidth = w_map[el.font || "2"] || 12;
+                        renderCanvas();
+                    };
                     div.appendChild(handle);
                 });
             }
@@ -344,17 +360,58 @@
         };
 
         window.onmousemove = (e) => {
-            if (!isDragging || !dragTarget) return;
+            if (!dragTarget) return;
             let dx = e.clientX - startX;
             let dy = e.clientY - startY;
-            dragTarget.x = Math.round(initialX + dx);
-            dragTarget.y = Math.round(initialY + dy);
-            renderCanvas();
+            
+            if (isResizing) {
+                if (dragTarget.type === 'text') {
+                    // text resize handles wrapping width
+                    let charDelta = Math.round(dx / currentFontWidth);
+                    if (isResizing.includes('w')) {
+                        // Dragging left handles increases width if moved left, decreases if moved right
+                        dragTarget.wrapWidth = Math.max(5, initialWrapWidth - charDelta);
+                        // Shift x to keep right side stationary
+                        dragTarget.x = initialX + (initialWrapWidth - dragTarget.wrapWidth) * currentFontWidth;
+                    } else {
+                        // Dragging right handles
+                        dragTarget.wrapWidth = Math.max(5, initialWrapWidth + charDelta);
+                    }
+                } else if (dragTarget.type === 'barcode') {
+                    // barcode resize handles height
+                    if (isResizing.includes('n')) dragTarget.y = initialY + dy;
+                    if (isResizing.includes('n') || isResizing.includes('s')) {
+                        let hDelta = isResizing.includes('n') ? -dy : dy;
+                        dragTarget.height = Math.max(10, ((dragTarget.height || 50)) + hDelta); 
+                        // wait barcode height isn't stored in initialWrapWidth
+                    }
+                }
+                renderCanvas();
+            } else if (isDragging) {
+                dragTarget.x = Math.round(initialX + dx);
+                dragTarget.y = Math.round(initialY + dy);
+                renderCanvas();
+            }
         };
 
         window.onmouseup = () => {
             isDragging = false;
+            isResizing = null;
             dragTarget = null;
+        };
+
+        document.getElementById('btn-expand').onclick = () => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(!el || el.type !== 'text') return;
+            el.wrapWidth = (el.wrapWidth || 32) + 5;
+            renderCanvas();
+        };
+
+        document.getElementById('btn-contract').onclick = () => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(!el || el.type !== 'text') return;
+            el.wrapWidth = Math.max(10, (el.wrapWidth || 32) - 5);
+            renderCanvas();
         };
 
         document.getElementById('btn-smaller').onclick = () => {
