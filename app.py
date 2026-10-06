@@ -294,30 +294,8 @@ with tab_designer:
             "NutritionTitle": "Nutritional Facts (per 100g):",
             "NutritionCol1": nutrition_col1,
             "NutritionCol2": nutrition_col2
-        }" if not weight_input.startswith("Net wt") else weight_input,
-            "MRP": mrp_input,
-            "Batch": f"Batch: {batch_input}" if not batch_input.startswith("Batch") else batch_input,
-            "BestBeforeTitle": "Expiry Date:",
-            "BestBeforeDate": expiry_date_input,
-            "Barcode": barcode_input,
-            "ShopName1": "Shree Jayshakti",
-            "ShopName2": "Farsan Mart",
-            "Address": "Ahmedabadi pole, Raopura.",
-            "MfgDateTitle": f"Mfg Date: {mfg_date_input}",
-            "BestBeforeTitle": f"Expiry Date: {expiry_date_input}",
-            "ShopName1": "Shree Jayshakti Farsan Mart",
-            "IngredientsTitle": "Ingredients:",
-            "IngredientsText": "\n".join(textwrap.wrap(ingredients_input, width=32)) if selected_orient == "Full Label" else ingredients_input,
-            "NutritionTitle": "Nutritional Facts (per 100g):",
-            "NutritionCol1": nutrition_col1,
-            "NutritionCol2": nutrition_col2
         }
-        
-        for i in range(1, 7):
-            live_data[f"ProductName_{i}"] = name_input
-            live_data[f"NetWeight_{i}"] = f"Net wt: {weight_input}" if not weight_input.startswith("Net wt") else weight_input
-            live_data[f"MRP_{i}"] = mrp_input
-            live_data[f"Barcode_{i}"] = barcode_input
+
 
         if st.button("✏️ Edit Barcode Layout", type="primary"):
             st.session_state.editor_open = True
