@@ -174,13 +174,11 @@ with tab_designer:
         expiry_date_input = st.text_input("Expiry Date", value=(datetime.now() + timedelta(days=60)).strftime("%d-%b-%Y").upper())
         barcode_input = st.text_input("Barcode Data", value=item_data.get("barcode", "").replace(".0", "") if pd.notnull(item_data.get("barcode")) else "")
 
-        st.subheader("3. Sticker Orientation")
-        selected_orient = st.radio("Select Orientation", ["Landscape", "Portrait", "Mini 6-in-1"], index=0, horizontal=True)
+        st.subheader("3. Sticker Options")
+        selected_orient = st.radio("Select Layout", ["Landscape", "Mini 6-in-1"], index=0, horizontal=True)
 
         if selected_orient == "Landscape":
             base_preset_name = "Default Landscape"
-        elif selected_orient == "Portrait":
-            base_preset_name = "Default Vertical (2-up)"
         else:
             base_preset_name = "Default Mini 6-in-1"
             
