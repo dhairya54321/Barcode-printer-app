@@ -158,7 +158,7 @@ with tab_designer:
         weight_input = st.text_input("Net Weight", value=parse_weight(default_name))
         mrp_input = st.text_input("MRP", value=f"MRP: ₹ {item_data.get('price', '')}" if item_data.get("price") else "MRP: ₹ ")
         batch_input = st.text_input("Batch No", value=datetime.now().strftime("%m%d"))
-        expiry_date_input = st.text_input("Expiry Date", value=(datetime.now() + timedelta(days=60)).strftime("%d -%b -%Y").upper())
+        expiry_date_input = st.text_input("Expiry Date", value=(datetime.now() + timedelta(days=60)).strftime("%d-%b-%Y").upper())
         barcode_input = st.text_input("Barcode Data", value=item_data.get("barcode", "").replace(".0", "") if pd.notnull(item_data.get("barcode")) else "")
 
         st.subheader("3. Sticker Orientation")
