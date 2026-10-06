@@ -1957,5 +1957,133 @@
             }
         ],
         "orientation": "mini 6-in-1"
+    },
+    "Default Full Label": {
+        "layout_type": "single",
+        "orientation": "portrait",
+        "right_x_offset": 0,
+        "elements": [
+            {
+                "id": "ProductName",
+                "type": "text",
+                "x": 10,
+                "y": 20,
+                "font": "3"
+            },
+            {
+                "id": "NetWeight",
+                "type": "text",
+                "x": 10,
+                "y": 60,
+                "font": "2"
+            },
+            {
+                "id": "MRP",
+                "type": "text",
+                "x": 180,
+                "y": 60,
+                "font": "2"
+            },
+            {
+                "id": "MfgDateTitle",
+                "type": "text",
+                "x": 10,
+                "y": 90,
+                "font": "1"
+            },
+            {
+                "id": "MfgDate",
+                "type": "text",
+                "x": 10,
+                "y": 110,
+                "font": "2"
+            },
+            {
+                "id": "IngredientsTitle",
+                "type": "text",
+                "x": 10,
+                "y": 150,
+                "font": "2"
+            },
+            {
+                "id": "IngredientsText",
+                "type": "text",
+                "x": 10,
+                "y": 180,
+                "font": "1"
+            },
+            {
+                "id": "NutritionTitle",
+                "type": "text",
+                "x": 10,
+                "y": 280,
+                "font": "2"
+            },
+            {
+                "id": "NutritionCol1",
+                "type": "text",
+                "x": 10,
+                "y": 310,
+                "font": "1"
+            },
+            {
+                "id": "NutritionCol2",
+                "type": "text",
+                "x": 180,
+                "y": 310,
+                "font": "1"
+            },
+            {
+                "id": "Barcode",
+                "type": "barcode",
+                "x": 10,
+                "y": 420,
+                "height": 70,
+                "thickness": 2,
+                "rotation": 0
+            },
+            {
+                "id": "BestBeforeTitle",
+                "type": "text",
+                "x": 220,
+                "y": 410,
+                "font": "1"
+            },
+            {
+                "id": "BestBeforeDate",
+                "type": "text",
+                "x": 220,
+                "y": 430,
+                "font": "2"
+            },
+            {
+                "id": "Batch",
+                "type": "text",
+                "x": 220,
+                "y": 460,
+                "font": "2"
+            },
+            {
+                "id": "ShopName1",
+                "type": "text",
+                "x": 10,
+                "y": 520,
+                "font": "2"
+            },
+            {
+                "id": "ShopName2",
+                "type": "text",
+                "x": 10,
+                "y": 550,
+                "font": "2"
+            },
+            {
+                "id": "Address",
+                "type": "text",
+                "x": 10,
+                "y": 580,
+                "font": "1"
+            }
+        ]
     }
 }

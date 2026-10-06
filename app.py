@@ -5,7 +5,17 @@ from datetime import datetime, timedelta
 import os
 import subprocess
 import json
+
+import json
 import streamlit.components.v1 as components
+
+if not os.path.exists('product_details.json'):
+    with open('product_details.json', 'w') as f:
+        json.dump({}, f, indent=4)
+
+with open('product_details.json', 'r') as f:
+    product_details = json.load(f)
+
 
 st.set_page_config(page_title="Jayshakti Farsan Mart - Barcode Printer", layout="wide")
 st.title("🖨️ Jayshakti Farsan Mart - Barcode Printer")
@@ -167,18 +177,61 @@ with tab_designer:
         st.subheader("2. Label Details")
 
         default_name = item_data.get("name", "")
+        saved_details = product_details.get(default_name, {})
+        
         name_input = st.text_area("Product Name (Press Enter for new line)", value=default_name, height=80)
-        weight_input = st.text_input("Net Weight", value=parse_weight(default_name))
-        mrp_input = st.text_input("MRP", value=f"MRP: ₹ {item_data.get('price', '')}" if item_data.get("price") else "MRP: ₹ ")
+        weight_input = st.text_input("Net Weight", value=saved_details.get("NetWeight", parse_weight(default_name)))
+        mrp_input = st.text_input("MRP", value=saved_details.get("MRP", f"MRP: ₹ {item_data.get('price', '')}" if item_data.get("price") else "MRP: ₹ "))
         batch_input = st.text_input("Batch No", value=datetime.now().strftime("%m%d"))
         expiry_date_input = st.text_input("Expiry Date", value=(datetime.now() + timedelta(days=60)).strftime("%d-%b-%Y").upper())
+        
+        mfg_date_input = ""
+        ingredients_input = ""
+        nutrition_col1 = ""
+        nutrition_col2 = ""
+        
+        if selected_orient == "Full Label":
+            mfg_date_input = st.text_input("Mfg Date", value=saved_details.get("MfgDate", datetime.now().strftime("%d-%b-%Y").upper()))
+            
+            # Smart auto-guess
+            default_ingredients = "Gram Flour, Edible Vegetable Oil, Salt, Spices & Condiments."
+            if "bhakarwadi" in default_name.lower():
+                default_ingredients = "Gram flour, Wheat flour, Edible oil, Sugar, Sesame seeds, Spices, Salt, Condiments."
+            elif "chikki" in default_name.lower():
+                default_ingredients = "Peanuts, Jaggery, Liquid glucose, Cardamom."
+            elif "sev" in default_name.lower():
+                default_ingredients = "Gram Flour, Edible Vegetable Oil, Salt, Ajwain, Spices."
+                
+            ingredients_input = st.text_area("Ingredients", value=saved_details.get("Ingredients", default_ingredients), height=100)
+            
+            col_nut1, col_nut2 = st.columns(2)
+            with col_nut1:
+                nutrition_col1 = st.text_area("Nutrition (Left)", value=saved_details.get("NutritionCol1", "Calories: 520 kcal\nTotal Fat: 30g\nSodium: 450mg"), height=100)
+            with col_nut2:
+                nutrition_col2 = st.text_area("Nutrition (Right)", value=saved_details.get("NutritionCol2", "Total Carbs: 55g\nProtein: 12g\nSugar: 5g"), height=100)
+                
+            if st.button(f"💾 Save Details for {default_name}"):
+                product_details[default_name] = {
+                    "NetWeight": weight_input,
+                    "MRP": mrp_input,
+                    "MfgDate": mfg_date_input,
+                    "Ingredients": ingredients_input,
+                    "NutritionCol1": nutrition_col1,
+                    "NutritionCol2": nutrition_col2
+                }
+                with open('product_details.json', 'w') as f:
+                    json.dump(product_details, f, indent=4)
+                st.success("Details saved successfully!")
+
         barcode_input = st.text_input("Barcode Data", value=item_data.get("barcode", "").replace(".0", "") if pd.notnull(item_data.get("barcode")) else "")
 
         st.subheader("3. Sticker Options")
-        selected_orient = st.radio("Select Layout", ["Landscape", "Mini 6-in-1"], index=0, horizontal=True)
+        selected_orient = st.radio("Select Layout", ["Landscape", "Mini 6-in-1", "Full Label"], index=0, horizontal=True)
 
         if selected_orient == "Landscape":
             base_preset_name = "Default Landscape"
+        elif selected_orient == "Full Label":
+            base_preset_name = "Default Full Label"
         else:
             base_preset_name = "Default Mini 6-in-1"
             
@@ -207,7 +260,14 @@ with tab_designer:
             "Barcode": barcode_input,
             "ShopName1": "Shree Jayshakti",
             "ShopName2": "Farsan Mart",
-            "Address": "Ahmedabadi pole, Raopura."
+            "Address": "Ahmedabadi pole, Raopura.",
+            "MfgDateTitle": "Mfg Date:",
+            "MfgDate": mfg_date_input,
+            "IngredientsTitle": "Ingredients:",
+            "IngredientsText": ingredients_input,
+            "NutritionTitle": "Nutritional Facts (per 100g):",
+            "NutritionCol1": nutrition_col1,
+            "NutritionCol2": nutrition_col2
         }
         
         for i in range(1, 7):
