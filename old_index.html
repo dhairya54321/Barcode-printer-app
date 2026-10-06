@@ -105,17 +105,14 @@
 </head>
 <body>
     <div class="toolbar">
-        <button id="btn-save" style="background: #8a2be2; color: white; border: none;" title="Save for this item only">Save Layout</button>
-        <button id="btn-save-all" style="background: #28a745; color: white; border: none; margin-left: 5px;" title="Apply this layout to all items">Save for All Items</button>
-        <div class="divider"></div>
-        <button id="btn-smaller">A-</button>
-        <span id="font-label" style="font-size: 14px; min-width: 60px; text-align: center;">Font: 2</span>
-        <button id="btn-larger">A+</button>
-        <div class="divider"></div>
-        <button id="btn-expand" title="Expand Text Width">← →</button>
-        <button id="btn-contract" title="Contract Text Width">→ ←</button>
-        <div class="divider"></div>
-        <button id="btn-align-left" title="Align Left">⫷</button>
+        <button id="btn-save" class="btn btn-save" style="background-color: #9c27b0;">Save Layout</button>
+        <button id="btn-save-global" class="btn btn-save" style="background-color: #28a745;">Save for All Items</button>
+        <button id="btn-font-minus" class="btn">A-</button>
+        <span id="font-display" style="display: flex; align-items: center; font-family: monospace;">H: 50</span>
+        <button id="btn-font-plus" class="btn">A+</button>
+        <button id="btn-expand" class="btn" title="Expand Horizontally">← →</button>
+        <button id="btn-contract" class="btn" title="Contract Horizontally">→ ←</button>
+        <button id="btn-align-left" class="btn">◀</button>
         <button id="btn-align-center" title="Align Center">⫼</button>
         <button id="btn-align-right" title="Align Right">⫸</button>
         <div class="divider"></div>
@@ -190,27 +187,6 @@
         
         window.addEventListener("message", onMessage);
 
-        
-        function getWrappedLines(text, width) {
-            if (!width) return text.split('\n');
-            let result = [];
-            let segments = text.split('\n');
-            for (let seg of segments) {
-                let words = seg.split(' ');
-                let currentLine = '';
-                for (let word of words) {
-                    if ((currentLine + word).length > width) {
-                        if (currentLine) result.push(currentLine.trim());
-                        currentLine = word + ' ';
-                    } else {
-                        currentLine += word + ' ';
-                    }
-                }
-                if (currentLine) result.push(currentLine.trim());
-            }
-            return result;
-        }
-
         function renderCanvas() {
             let orient = INIT_LAYOUT.orientation || 'portrait';
             canvas.style.width = '400px';
@@ -245,7 +221,7 @@
             }
             
             let align = el.align || 'left';
-            let txt = String(LIVE_DATA[el.id] !== undefined ? LIVE_DATA[el.id] : (el.text || el.id));
+            let txt = String(LIVE_DATA[el.id] || el.text || el.id);
             
             if (el.type === 'text') {
                 let fontStr = (el.font || "2").toString();
@@ -254,8 +230,7 @@
                 div.style.fontSize = h + 'px';
                 div.style.lineHeight = (h + 4) + 'px';
                 
-                let lines = getWrappedLines(txt, el.wrapWidth);
-                let longestLine = Math.max(...lines.map(l => l.length));
+                let longestLine = Math.max(...txt.split("\n").map(l => l.length));
                 let pxWidth = longestLine * w;
                 let xAdj = 0;
                 if(align === 'center') xAdj = - (pxWidth / 2);
@@ -265,7 +240,7 @@
             div.style.left = (el.x + xAdj) + 'px';
             div.style.top = (el.y + (isGhost ? rightOffset : 0)) + 'px';
                 div.style.textAlign = align;
-                div.innerHTML = lines.join('<br>');
+                div.innerHTML = txt.replace(/\n/g, '<br>');
                 
                 if (el.invert) {
                     div.style.backgroundColor = 'black';
