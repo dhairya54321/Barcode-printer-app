@@ -234,7 +234,8 @@ with tab_designer:
 
             y_offset = layout.get("right_x_offset", 300)
 
-            for side in [0, 1]:
+            is_single = layout.get("layout_type") == "single"
+            for side in ([0] if is_single else [0, 1]):
                 html += f'<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; transform: {"translateY(" + str(y_offset) + "px)" if side == 1 else "none"};">'
 
                 for el in layout["elements"]:
@@ -328,7 +329,8 @@ with tab_designer:
                 tspl = "SIZE 75 mm, 50 mm\r\nGAP 2 mm, 0 mm\r\nDIRECTION 1\r\nCLS\r\n"
                 right_off = int(current_preset.get("right_x_offset", 300))
 
-                for side in [0, 1]:
+                is_single = current_preset.get("layout_type") == "single"
+                for side in ([0] if is_single else [0, 1]):
                     for el in current_preset["elements"]:
                         txt = el.get("text") or live_data.get(el["id"], "")
                         if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
@@ -350,7 +352,7 @@ with tab_designer:
                                     elif align == "right": x_adj = int(-line_width)
 
                                     # ALWAYS rotate 90 degrees for Landscape preset!
-                                    x_base = 300 if side == 0 else 600
+                                    x_base = 600 if is_single else (300 if side == 0 else 600)
                                     phys_x = int(x_base - el["y"] - (i * line_height))
                                     phys_y = int(el["x"] + x_adj)
                                     phys_x = max(0, phys_x)
@@ -380,7 +382,7 @@ with tab_designer:
                             if align == "center": x_adj = int(-(bw / 2))
                             elif align == "right": x_adj = int(-bw)
 
-                            x_base = 300 if side == 0 else 600
+                            x_base = 600 if is_single else (300 if side == 0 else 600)
                             phys_x = int(x_base - el["y"])
                             phys_y = int(el["x"] + x_adj)
                             phys_rot = (int(el.get("rotation",0)) + 90) % 360
@@ -440,7 +442,8 @@ with tab_batch:
                             full_tspl += "CLS\r\n"
                             item_preset = item["preset"]
                             item_live = item["live_data"]
-                            for side in [0, 1]:
+                            is_single = item_preset.get("layout_type") == "single"
+                            for side in ([0] if is_single else [0, 1]):
                                 for el in item_preset["elements"]:
                                     txt = el.get("text") or item_live.get(el["id"], "")
                                     if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
@@ -461,7 +464,7 @@ with tab_batch:
                                                 if align == "center": x_adj = int(-(line_width / 2))
                                                 elif align == "right": x_adj = int(-line_width)
                                                 
-                                                x_base = 300 if side == 0 else 600
+                                                x_base = 600 if is_single else (300 if side == 0 else 600)
                                                 phys_x = int(x_base - el["y"] - (i * line_height))
                                                 phys_y = int(el["x"] + x_adj)
                                                 phys_x = max(0, phys_x)
@@ -491,7 +494,7 @@ with tab_batch:
                                         if align == "center": x_adj = int(-(bw / 2))
                                         elif align == "right": x_adj = int(-bw)
                                         
-                                        x_base = 300 if side == 0 else 600
+                                        x_base = 600 if is_single else (300 if side == 0 else 600)
                                         phys_x = int(x_base - el["y"])
                                         phys_y = int(el["x"] + x_adj)
                                         phys_rot = (int(el.get("rotation",0)) + 90) % 360
@@ -534,7 +537,8 @@ def generate_tspl(layout, copies):
         
         tspl = "SIZE 75 mm, 50 mm\r\nGAP 3 mm, 0 mm\r\nCLS\r\n"
         
-        for side in [0, 1]:
+        is_single = layout.get("layout_type") == "single"
+        for side in ([0] if is_single else [0, 1]):
             for el in layout.get("elements", []):
                 txt = str(st.session_state.live_data.get(el["id"], el.get("text", el["id"])))
                 
@@ -556,7 +560,7 @@ def generate_tspl(layout, copies):
                         if align == "center": x_adj = int(-(line_width / 2))
                         elif align == "right": x_adj = int(-line_width)
                         
-                        x_base = 300 if side == 0 else 600
+                        x_base = 600 if is_single else (300 if side == 0 else 600)
                         phys_x = int(x_base - el["y"] - (i * line_height))
                         
                         if el.get("invert"):
@@ -588,7 +592,7 @@ def generate_tspl(layout, copies):
                     if align == "center": x_adj = int(-(bw / 2))
                     elif align == "right": x_adj = int(-bw)
                     
-                    x_base = 300 if side == 0 else 600
+                    x_base = 600 if is_single else (300 if side == 0 else 600)
                     phys_x = int(x_base - el["y"])
                     phys_y = int(el["x"] + x_adj)
                     phys_rot = (int(el.get("rotation",0)) + 90) % 360
@@ -618,7 +622,8 @@ def download_tspl(layout):
     h_map = {"1": 12, "2": 20, "3": 24, "4": 32, "5": 48}
     w_map = {"1": 8, "2": 12, "3": 14, "4": 24, "5": 32}
     
-    for side in [0, 1]:
+    is_single = layout.get("layout_type") == "single"
+    for side in ([0] if is_single else [0, 1]):
         for el in layout.get("elements", []):
             txt = str(st.session_state.live_data.get(el["id"], el.get("text", el["id"])))
             if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
@@ -640,7 +645,7 @@ def download_tspl(layout):
                     if align == "center": x_adj = int(-(line_width / 2))
                     elif align == "right": x_adj = int(-line_width)
                     
-                    x_base = 300 if side == 0 else 600
+                    x_base = 600 if is_single else (300 if side == 0 else 600)
                     phys_x = int(x_base - el["y"] - (i * line_height))
                     phys_y = int(el["x"] + x_adj)
                     
@@ -668,7 +673,7 @@ def download_tspl(layout):
                 if align == "center": x_adj = int(-(bw / 2))
                 elif align == "right": x_adj = int(-bw)
                 
-                x_base = 300 if side == 0 else 600
+                x_base = 600 if is_single else (300 if side == 0 else 600)
                 phys_x = int(x_base - el["y"])
                 phys_y = int(el["x"] + x_adj)
                 phys_rot = (int(el.get("rotation",0)) + 90) % 360
