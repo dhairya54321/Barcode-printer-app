@@ -1960,91 +1960,92 @@
     },
     "Default Full Label": {
         "layout_type": "single",
-        "orientation": "portrait",
+        "orientation": "full label",
         "right_x_offset": 0,
         "elements": [
             {
                 "id": "ProductName",
                 "type": "text",
-                "x": 10,
-                "y": 10,
-                "font": "5"
+                "x": 8,
+                "y": 22,
+                "font": "3"
             },
             {
                 "id": "NetWeight",
                 "type": "text",
-                "x": 10,
-                "y": 70,
-                "font": "3"
+                "x": 9,
+                "y": 75,
+                "font": "2"
             },
             {
                 "id": "MRP",
                 "type": "text",
-                "x": 10,
+                "x": 9,
                 "y": 110,
-                "font": "3"
+                "font": "2"
             },
             {
                 "id": "MfgDateTitle",
                 "type": "text",
                 "x": 10,
                 "y": 150,
-                "font": "3"
+                "font": "2"
             },
             {
                 "id": "BestBeforeTitle",
                 "type": "text",
                 "x": 10,
                 "y": 190,
-                "font": "3"
+                "font": "2"
             },
             {
                 "id": "Batch",
                 "type": "text",
                 "x": 10,
                 "y": 230,
-                "font": "3"
+                "font": "2"
             },
             {
                 "id": "IngredientsTitle",
                 "type": "text",
                 "x": 10,
-                "y": 270,
-                "font": "3"
+                "y": 271,
+                "font": "2"
             },
             {
                 "id": "IngredientsText",
                 "type": "text",
-                "x": 10,
+                "x": 17,
                 "y": 300,
-                "font": "2"
+                "font": "1",
+                "wrapWidth": 32
             },
             {
                 "id": "NutritionTitle",
                 "type": "text",
-                "x": 10,
-                "y": 370,
-                "font": "3"
+                "x": 20,
+                "y": 376,
+                "font": "2"
             },
             {
                 "id": "NutritionCol1",
                 "type": "text",
-                "x": 20,
-                "y": 410,
-                "font": "2"
+                "x": 45,
+                "y": 407,
+                "font": "1"
             },
             {
                 "id": "NutritionCol2",
                 "type": "text",
-                "x": 200,
-                "y": 410,
-                "font": "2"
+                "x": 192,
+                "y": 408,
+                "font": "1"
             },
             {
                 "id": "Barcode",
                 "type": "barcode",
-                "x": 100,
-                "y": 480,
+                "x": 99,
+                "y": 461,
                 "height": 60,
                 "thickness": 2,
                 "rotation": 0
@@ -2052,16 +2053,16 @@
             {
                 "id": "ShopName1",
                 "type": "text",
-                "x": 10,
-                "y": 550,
-                "font": "3"
+                "x": 16,
+                "y": 544,
+                "font": "2"
             },
             {
                 "id": "Address",
                 "type": "text",
-                "x": 20,
-                "y": 575,
-                "font": "3"
+                "x": 29,
+                "y": 570,
+                "font": "2"
             }
         ]
     }

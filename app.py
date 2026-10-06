@@ -290,7 +290,7 @@ with tab_designer:
             "Address": "Ahmedabadi pole, Raopura.",
             "MfgDateTitle": f"Mfg Date: {mfg_date_input}" if selected_orient == "Full Label" else "",
             "IngredientsTitle": "Ingredients:",
-            "IngredientsText": "\n".join(textwrap.wrap(ingredients_input, width=32)) if selected_orient == "Full Label" else ingredients_input,
+            "IngredientsText": ingredients_input,
             "NutritionTitle": "Nutritional Facts (per 100g):",
             "NutritionCol1": nutrition_col1,
             "NutritionCol2": nutrition_col2
@@ -328,8 +328,16 @@ with tab_designer:
                         w = w_map.get(str(el.get("font", "2")), 12)
                         align = el.get("align", "left")
 
-                        lines = str(txt).split("\n")
-                        for i, line in enumerate(lines):
+                        
+                            lines = []
+                            for segment in str(txt).split("
+"):
+                                if el.get("wrapWidth"):
+                                    lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
+                                else:
+                                    lines.append(segment)
+                                    
+                            for i, line in enumerate(lines):
                             if line.strip():
                                 line_width = len(line.strip()) * w
                                 x_adj = 0
@@ -411,7 +419,7 @@ with tab_designer:
                 is_single = current_preset.get("layout_type") == "single"
                 for side in ([0] if is_single else [0, 1]):
                     for el in current_preset["elements"]:
-                        txt = el.get("text") or live_data.get(el["id"], "")
+                        txt = str(live_data[el["id"]] if el["id"] in live_data else el.get("text", el["id"]))
                         if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
 
                         if el["type"] == "text":
@@ -422,7 +430,15 @@ with tab_designer:
                             line_height = char_h + 4
                             align = el.get("align", "left")
 
-                            lines = str(txt).split("\n")
+                            
+                            lines = []
+                            for segment in str(txt).split("
+"):
+                                if el.get("wrapWidth"):
+                                    lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
+                                else:
+                                    lines.append(segment)
+                                    
                             for i, line in enumerate(lines):
                                 if line.strip():
                                     line_width = len(line.strip()) * char_w
@@ -524,7 +540,7 @@ with tab_batch:
                             is_single = item_preset.get("layout_type") == "single"
                             for side in ([0] if is_single else [0, 1]):
                                 for el in item_preset["elements"]:
-                                    txt = el.get("text") or item_live.get(el["id"], "")
+                                    txt = str(item_live[el["id"]] if el["id"] in item_live else el.get("text", el["id"]))
                                     if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
                                     
                                     if el["type"] == "text":
@@ -535,8 +551,16 @@ with tab_batch:
                                         line_height = char_h + 4
                                         align = el.get("align", "left")
                                         
-                                        lines = str(txt).split("\n")
-                                        for i, line in enumerate(lines):
+                                        
+                            lines = []
+                            for segment in str(txt).split("
+"):
+                                if el.get("wrapWidth"):
+                                    lines.extend(textwrap.wrap(segment, width=int(el["wrapWidth"])))
+                                else:
+                                    lines.append(segment)
+                                    
+                            for i, line in enumerate(lines):
                                             if line.strip():
                                                 line_width = len(line.strip()) * char_w
                                                 x_adj = 0
@@ -619,7 +643,7 @@ def generate_tspl(layout, copies):
         is_single = layout.get("layout_type") == "single"
         for side in ([0] if is_single else [0, 1]):
             for el in layout.get("elements", []):
-                txt = str(st.session_state.live_data.get(el["id"], el.get("text", el["id"])))
+                txt = str(st.session_state.live_data[el["id"]] if el["id"] in st.session_state.live_data else el.get("text", el["id"]))
                 
                 if el["type"] == "text":
                     font_str = str(el.get("font", "2"))
@@ -704,7 +728,7 @@ def download_tspl(layout):
     is_single = layout.get("layout_type") == "single"
     for side in ([0] if is_single else [0, 1]):
         for el in layout.get("elements", []):
-            txt = str(st.session_state.live_data.get(el["id"], el.get("text", el["id"])))
+            txt = str(st.session_state.live_data[el["id"]] if el["id"] in st.session_state.live_data else el.get("text", el["id"]))
             if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
             
             if el["type"] == "text":
