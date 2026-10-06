@@ -650,8 +650,7 @@
                 "x": 23,
                 "y": 15,
                 "font": "3",
-                "invert": true,
-                "text": "Butter Bhakharwadi 250G"
+                "invert": true
             },
             {
                 "id": "NetWeight",
@@ -1966,79 +1965,83 @@
             {
                 "id": "ProductName",
                 "type": "text",
-                "x": 8,
-                "y": 22,
-                "font": "3"
+                "x": 0,
+                "y": 19,
+                "font": "3",
+                "wrapWidth": 23
             },
             {
                 "id": "NetWeight",
                 "type": "text",
-                "x": 9,
-                "y": 75,
+                "x": 6,
+                "y": 62,
                 "font": "2"
             },
             {
                 "id": "MRP",
                 "type": "text",
-                "x": 9,
-                "y": 110,
+                "x": 6,
+                "y": 92,
                 "font": "2"
             },
             {
                 "id": "MfgDateTitle",
                 "type": "text",
-                "x": 10,
-                "y": 150,
+                "x": 6,
+                "y": 122,
                 "font": "2"
             },
             {
                 "id": "BestBeforeTitle",
                 "type": "text",
-                "x": 10,
-                "y": 190,
-                "font": "2"
+                "x": 5,
+                "y": 149,
+                "font": "2",
+                "wrapWidth": 32
             },
             {
                 "id": "Batch",
                 "type": "text",
-                "x": 10,
-                "y": 230,
+                "x": 8,
+                "y": 176,
                 "font": "2"
             },
             {
                 "id": "IngredientsTitle",
                 "type": "text",
-                "x": 10,
-                "y": 271,
-                "font": "2"
+                "x": 7,
+                "y": 202,
+                "font": "2",
+                "wrapWidth": 35
             },
             {
                 "id": "IngredientsText",
                 "type": "text",
-                "x": 17,
-                "y": 300,
+                "x": 9,
+                "y": 231,
                 "font": "1",
-                "wrapWidth": 32
+                "wrapWidth": 49
             },
             {
                 "id": "NutritionTitle",
                 "type": "text",
-                "x": 20,
-                "y": 376,
+                "x": 15,
+                "y": 348,
                 "font": "2"
             },
             {
                 "id": "NutritionCol1",
                 "type": "text",
-                "x": 45,
-                "y": 407,
-                "font": "1"
+                "x": 24,
+                "y": 387,
+                "font": "1",
+                "wrapWidth": 37
             },
             {
                 "id": "NutritionCol2",
                 "type": "text",
-                "x": 192,
-                "y": 408,
+                "x": 205,
+                "y": 388,
                 "font": "1"
             },
             {

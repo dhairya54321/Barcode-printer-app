@@ -248,8 +248,27 @@ with tab_designer:
             
             default_ingredients = "Gram Flour (Besan), Edible Vegetable Oil (Palmolein), Iodized Salt, Spices & Condiments."
             nm = default_name.lower()
+            
+            # Smart spelling matching logic
+            import re
+            nm_clean = re.sub(r'[^a-z]', '', nm)
+            
             for key, val in farsan_dict.items():
+                # Exact match
                 if key in nm:
+                    default_ingredients = val
+                    break
+                # Common misspellings handler
+                if key == "bhakarwadi" and ("bhakarwadi" in nm or "bhakharwadi" in nm or "bakharwadi" in nm):
+                    default_ingredients = val
+                    break
+                if key == "chikki" and ("chiki" in nm or "chikki" in nm):
+                    default_ingredients = val
+                    break
+                # Remove h's and check again to catch misspellings
+                key_no_h = key.replace('h', '')
+                nm_no_h = nm_clean.replace('h', '')
+                if key_no_h in nm_no_h:
                     default_ingredients = val
                     break
                 

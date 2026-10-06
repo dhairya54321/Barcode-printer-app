@@ -519,7 +519,12 @@
         }
 
         document.getElementById('btn-save').onclick = () => {
-            INIT_LAYOUT.elements = elementsData;
+            let dynamicIds = ["ProductName", "NetWeight", "MRP", "Batch", "BestBeforeDate", "BestBeforeTitle", "Barcode", "MfgDateTitle", "ShopName1", "ShopName2", "IngredientsText", "NutritionCol1", "NutritionCol2"];
+            let elementsToSave = JSON.parse(JSON.stringify(elementsData));
+            elementsToSave.forEach(el => {
+                if (dynamicIds.includes(el.id)) delete el.text;
+            });
+            INIT_LAYOUT.elements = elementsToSave;
             INIT_LAYOUT.save_mode = "item";
             window.parent.postMessage({
                 isStreamlitMessage: true,
@@ -529,7 +534,12 @@
         };
 
         document.getElementById('btn-save-all').onclick = () => {
-            INIT_LAYOUT.elements = elementsData;
+            let dynamicIds = ["ProductName", "NetWeight", "MRP", "Batch", "BestBeforeDate", "BestBeforeTitle", "Barcode", "MfgDateTitle", "ShopName1", "ShopName2", "IngredientsText", "NutritionCol1", "NutritionCol2"];
+            let elementsToSave = JSON.parse(JSON.stringify(elementsData));
+            elementsToSave.forEach(el => {
+                if (dynamicIds.includes(el.id)) delete el.text;
+            });
+            INIT_LAYOUT.elements = elementsToSave;
             INIT_LAYOUT.save_mode = "global";
             window.parent.postMessage({
                 isStreamlitMessage: true,
