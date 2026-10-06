@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.env
+venv/
+env/
+fix_*.py
+rewrite_*.py
+temp*
+test*
+revert.py
+update_*.py
+force_*.py
+add_preset.py
+*.ppd
+*.prn
+.DS_Store

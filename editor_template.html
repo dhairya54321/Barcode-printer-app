@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body { font-family: sans-serif; background: #f0f2f6; margin: 0; padding: 20px; }
+    .editor-container { display: flex; gap: 20px; }
+    .canvas-container { 
+        position: relative; 
+        width: 600px; 
+        height: 400px; 
+        background: #fff; 
+        border: 2px solid #ccc;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .element { 
+        position: absolute; 
+        cursor: grab; 
+        user-select: none;
+        white-space: nowrap;
+    }
+    .element.selected {
+        outline: 2px dashed #ff4b4b;
+        background: rgba(255, 75, 75, 0.1);
+    }
+    .element:active { cursor: grabbing; }
+    .controls { overflow-y: auto; max-height: 400px; 
+        background: #fff; 
+        padding: 20px; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        width: 300px;
+    }
+    .control-group { margin-bottom: 15px; }
+    label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+    input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { 
+        background: #ff4b4b; color: #fff; border: none; padding: 10px; width: 100%; 
+        border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px;
+    }
+    button:hover { background: #ff3333; }
+    .barcode-placeholder {
+        background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px);
+        border: 1px solid #ccc;
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        font-family: monospace; font-size: 12px;
+    }
+</style>
+</head>
+<body>
+
+<h2>✏️ Canva-Style Sticker Designer</h2>
+<p>Click and drag elements on the left label. The right label mirrors your design.</p>
+
+<div class="editor-container">
+    <div class="canvas-container" id="canvas">
+        <!-- Elements will be injected here -->
+        <div id="divider" style="position: absolute; left: 300px; top: 0; bottom: 0; border-left: 2px dashed #ddd; pointer-events: none;"></div>
+    </div>
+    
+    <div class="controls">
+        <h3>Element Settings</h3>
+        <p id="no-selection" style="color: #888; font-size: 14px;">Click an element on the canvas to edit it.</p>
+        
+        <div id="settings-panel" style="display: none;">
+            <div class="control-group">
+                <label>Selected Element</label>
+                <input type="text" id="el-name" disabled>
+            </div>
+            <div class="control-group">
+                <label>X Position (dots)</label>
+                <input type="number" id="el-x" onchange="updateElement()">
+            </div>
+            <div class="control-group">
+                <label>Y Position (dots)</label>
+                <input type="number" id="el-y" onchange="updateElement()">
+            </div>
+            
+            <div id="text-controls" style="display:none;">
+                <div class="control-group">
+                    <label>Font Size</label>
+                    <select id="el-font" onchange="updateElement()">
+                        <option value="1">1 (Small)</option>
+                        <option value="2">2 (Medium)</option>
+                        <option value="3">3 (Large)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="barcode-controls" style="display:none;">
+                <div class="control-group">
+                    <label>Barcode Height</label>
+                    <input type="number" id="el-bheight" onchange="updateElement()">
+                </div>
+                <div class="control-group">
+                    <label>Thickness</label>
+                    <select id="el-thick" onchange="updateElement()">
+                        <option value="1">1 (Thin)</option>
+                        <option value="2">2 (Normal)</option>
+                        <option value="3">3 (Thick)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Rotation</label>
+                    <select id="el-rot" onchange="updateElement()">
+                        <option value="0">0° (Horizontal)</option>
+                        <option value="90">90° (Vertical)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <h3>Save Preset</h3>
+        <div class="control-group">
+            <label>Right Sticker X Offset (dots)</label>
+            <input type="number" id="right-offset" value="300" onchange="updateLayout()">
+            <small style="color:#777;">Decrease if right sticker gets cut off</small>
+        </div>
+        <div class="control-group">
+            <label>Preset Name</label>
+            <input type="text" id="preset-name" value="My Custom Layout">
+        </div>
+        <button onclick="savePreset()">💾 Save Layout</button>
+        <div id="status" style="margin-top:10px; color: green; font-weight: bold; text-align: center; display: none;">Saved successfully!</div>
+    </div>
+</div>
+
+<script>
+    // These will be injected by Python
+    const INIT_LAYOUT = __LAYOUT_JSON__;
+    const LIVE_DATA = __LIVE_DATA__;
+    
+    let elements = INIT_LAYOUT.elements;
+    let rightOffset = INIT_LAYOUT.right_x_offset || 300;
+    
+    document.getElementById('right-offset').value = rightOffset;
+    
+    const fontMap = {"1": "14px", "2": "18px", "3": "24px"};
+    const canvas = document.getElementById('canvas');
+    let selectedId = null;
+    
+    function renderCanvas() {
+        // Clear except divider
+        Array.from(canvas.children).forEach(c => {
+            if(c.id !== 'divider') c.remove();
+        });
+        
+        document.getElementById('divider').style.left = rightOffset + 'px';
+        
+        // Draw left label
+        drawElements(0, false);
+        // Draw right label (ghosted, non-interactive)
+        drawElements(rightOffset, true);
+    }
+    
+    function drawElements(xOff, isGhost) {
+        elements.forEach(el => {
+            const div = document.createElement('div');
+            div.className = 'element';
+            if(!isGhost) {
+                div.id = 'el_' + el.id;
+                div.onmousedown = (e) => startDrag(e, el.id);
+                if(selectedId === el.id) div.classList.add('selected');
+            } else {
+                div.style.opacity = '0.5';
+                div.style.pointerEvents = 'none';
+            }
+            
+            div.style.left = (el.x + xOff) + 'px';
+            div.style.top = el.y + 'px';
+            
+            if(el.type === 'text') {
+                div.style.fontSize = fontMap[el.font || "2"];
+                div.style.fontWeight = "bold";
+                div.style.fontFamily = "monospace";
+                div.innerText = LIVE_DATA[el.id] || "Text";
+            } 
+            else if(el.type === 'barcode') {
+                let rot = el.rotation === 90 ? "transform: rotate(90deg); transform-origin: top left;" : "";
+                let bw = el.thickness === 1 ? 90 : 160;
+                let bg = `repeating-linear-gradient(90deg, #000, #000 ${el.thickness}px, #fff ${el.thickness}px, #fff ${el.thickness*2}px)`;
+                div.innerHTML = `
+                <div style="width:${bw}px; height:${el.height}px; background:${bg}; ${rot}">
+                    <div style="position:absolute; bottom:-18px; width:100%; text-align:center; font-family:monospace; font-size:14px; letter-spacing:2px;">${LIVE_DATA[el.id]}</div>
+                </div>`;
+            }
+            else if(el.type === 'box') {
+                div.innerHTML = `<div style="width:16px; height:16px; border:2px solid green; display:flex; align-items:center; justify-content:center;"><div style="width:8px; height:8px; background:green; border-radius:50%;"></div></div>`;
+            }
+            
+            canvas.appendChild(div);
+        });
+    }
+    
+    let isDragging = false;
+    let dragStart = {x:0, y:0};
+    
+    function startDrag(e, id) {
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        selectedId = id;
+        isDragging = true;
+        
+        let el = elements.find(e => e.id === id);
+        dragStart.x = e.clientX - el.x;
+        dragStart.y = e.clientY - el.y;
+        
+        updatePanel();
+        renderCanvas();
+    }
+    
+    window.onmousemove = (e) => {
+        if(isDragging && selectedId) {
+            let el = elements.find(e => e.id === selectedId);
+            let canvasRect = canvas.getBoundingClientRect();
+            
+            // Allow dragging but clamp loosely
+            let newX = e.clientX - dragStart.x;
+            let newY = e.clientY - dragStart.y;
+            
+            el.x = Math.max(-50, Math.min(newX, 600));
+            el.y = Math.max(-50, Math.min(newY, 400));
+            
+            renderCanvas();
+            updatePanelInputs();
+        }
+    };
+    
+    window.onmouseup = () => { isDragging = false; };
+    
+    function updatePanel() {
+        if(!selectedId) {
+            document.getElementById('no-selection').style.display = 'block';
+            document.getElementById('settings-panel').style.display = 'none';
+            return;
+        }
+        
+        document.getElementById('no-selection').style.display = 'none';
+        document.getElementById('settings-panel').style.display = 'block';
+        
+        let el = elements.find(e => e.id === selectedId);
+        document.getElementById('el-name').value = el.id;
+        
+        if(el.type === 'text') {
+            document.getElementById('text-controls').style.display = 'block';
+            document.getElementById('barcode-controls').style.display = 'none';
+            document.getElementById('el-font').value = el.font || "2";
+        } else if(el.type === 'barcode') {
+            document.getElementById('text-controls').style.display = 'none';
+            document.getElementById('barcode-controls').style.display = 'block';
+            document.getElementById('el-bheight').value = el.height || 50;
+            document.getElementById('el-thick').value = el.thickness || 2;
+            document.getElementById('el-rot').value = el.rotation || 0;
+        } else {
+            document.getElementById('text-controls').style.display = 'none';
+            document.getElementById('barcode-controls').style.display = 'none';
+        }
+        
+        updatePanelInputs();
+    }
+    
+    function updatePanelInputs() {
+        if(!selectedId) return;
+        let el = elements.find(e => e.id === selectedId);
+        document.getElementById('el-x').value = Math.round(el.x);
+        document.getElementById('el-y').value = Math.round(el.y);
+    }
+    
+    function updateElement() {
+        if(!selectedId) return;
+        let el = elements.find(e => e.id === selectedId);
+        el.x = parseInt(document.getElementById('el-x').value);
+        el.y = parseInt(document.getElementById('el-y').value);
+        
+        if(el.type === 'text') {
+            el.font = document.getElementById('el-font').value;
+        } else if(el.type === 'barcode') {
+            el.height = parseInt(document.getElementById('el-bheight').value);
+            el.thickness = parseInt(document.getElementById('el-thick').value);
+            el.rotation = parseInt(document.getElementById('el-rot').value);
+        }
+        
+        renderCanvas();
+    }
+    
+    function updateLayout() {
+        rightOffset = parseInt(document.getElementById('right-offset').value);
+        renderCanvas();
+    }
+    
+    function savePreset() {
+        let presetName = document.getElementById('preset-name').value;
+        let payload = {
+            preset_name: presetName,
+            layout: {
+                layout_type: "2-up",
+                right_x_offset: rightOffset,
+                elements: elements
+            }
+        };
+        
+        let jsonStr = encodeURIComponent(JSON.stringify(payload));
+        // Push to parent window query string. Streamlit will catch it and reload!
+        window.parent.location.search = '?save_layout=' + jsonStr;
+        
+        let status = document.getElementById('status');
+        status.innerText = 'Saving... Please wait.';
+        status.style.color = 'blue';
+        status.style.display = 'block';
+    }
+    
+    // Init
+    renderCanvas();
+</script>
+</body>
+</html>

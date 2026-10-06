@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { margin: 0; padding: 0; background: #f0f2f5; font-family: sans-serif; }
+        .toolbar {
+            height: 50px; background: #fff; border-bottom: 1px solid #ddd;
+            display: flex; align-items: center; padding: 0 20px; gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .toolbar button {
+            background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 6px 12px; cursor: pointer;
+            font-size: 14px; font-weight: bold;
+        }
+        .toolbar button:hover { background: #e9ecef; }
+        .toolbar button.active { background: #e2e8f0; border-color: #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .divider { width: 1px; height: 24px; background: #ddd; margin: 0 8px; }
+        
+        .workspace { display: flex; height: 500px; }
+        .ruler-v { 
+            width: 25px; background: #fff; border-right: 1px solid #ddd; 
+            background-image: repeating-linear-gradient(to bottom, #999 0, #999 1px, transparent 1px, transparent 10px);
+        }
+        .main-area { flex: 1; display: flex; flex-direction: column; overflow: auto; }
+        .ruler-h { 
+            height: 25px; background: #fff; border-bottom: 1px solid #ddd;
+            background-image: repeating-linear-gradient(to right, #999 0, #999 1px, transparent 1px, transparent 10px);
+        }
+        
+        .canvas-container { padding: 40px; position: relative; }
+        #canvas {
+            background: white; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        #divider-line {
+            position: absolute; border-left: 2px dashed #bbb; display: none;
+        }
+        
+        .element {
+            position: absolute; cursor: move; user-select: none;
+            border: 2px solid transparent; box-sizing: content-box;
+            white-space: nowrap; font-family: monospace; font-weight: bold;
+        }
+        .element.selected { border: 2px solid #8a2be2; }
+        
+        .handle {
+            position: absolute; width: 8px; height: 8px; background: white; border: 2px solid #8a2be2;
+            border-radius: 50%; display: none;
+        }
+        .element.selected .handle { display: block; }
+        .handle.nw { top: -6px; left: -6px; cursor: nwse-resize; }
+        .handle.ne { top: -6px; right: -6px; cursor: nesw-resize; }
+        .handle.se { bottom: -6px; right: -6px; cursor: nwse-resize; }
+        .handle.sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+        
+        .barcode-stripes {
+            width: 100%; height: 100%;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+    <div class="toolbar">
+        <button id="btn-save" style="background: #8a2be2; color: white; border: none;">Save Layout</button>
+        <div class="divider"></div>
+        <button id="btn-smaller">A-</button>
+        <span id="font-label" style="font-size: 14px; min-width: 60px; text-align: center;">Font: 2</span>
+        <button id="btn-larger">A+</button>
+        <div class="divider"></div>
+        <button id="btn-align-left" title="Align Left">⫷</button>
+        <button id="btn-align-center" title="Align Center">⫼</button>
+        <button id="btn-align-right" title="Align Right">⫸</button>
+        <div class="divider"></div>
+        <button id="btn-invert" title="Toggle Black Box / White Text">⬛</button>
+        <div class="divider"></div>
+        <div id="padding-controls" style="display: none; align-items: center; gap: 5px; margin-right: 10px;">
+            <label style="font-size: 11px; color: #ccc;">Pad↔:</label>
+            <input type="number" id="pad-x" style="width: 40px; height: 22px; font-size: 11px; padding: 2px; border-radius: 4px; border: 1px solid #555; background: #333; color: white;" min="0" max="100">
+            <label style="font-size: 11px; color: #ccc;">Pad↕:</label>
+            <input type="number" id="pad-y" style="width: 40px; height: 22px; font-size: 11px; padding: 2px; border-radius: 4px; border: 1px solid #555; background: #333; color: white;" min="0" max="100">
+        </div>
+        <textarea id="text-edit" style="height: 30px; width: 150px; font-size: 12px; resize: none;" placeholder="Edit text here..."></textarea>
+    </div>
+    
+    <div class="workspace">
+        <div class="ruler-v"></div>
+        <div class="main-area">
+            <div class="ruler-h"></div>
+            <div class="canvas-container">
+                <div id="canvas">
+                    <div id="divider-line"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let INIT_LAYOUT = null;
+        let LIVE_DATA = {};
+        
+        const h_map = {"1": 12, "2": 20, "3": 24, "4": 32, "5": 48};
+        const w_map = {"1": 8, "2": 12, "3": 14, "4": 24, "5": 32};
+        
+        const canvas = document.getElementById('canvas');
+        const divider = document.getElementById('divider-line');
+        let rightOffset = 300;
+        let selectedId = null;
+        let elementsData = [];
+        
+        let isDragging = false;
+        let dragTarget = null;
+        let startX, startY, initialX, initialY;
+
+        function setFrameHeight(height) {
+            window.parent.postMessage({
+                isStreamlitMessage: true,
+                type: "streamlit:setFrameHeight",
+                height: height
+            }, "*");
+        }
+
+        let isInitialized = false;
+
+        function onMessage(event) {
+            if (event.data.type !== "streamlit:render") return;
+            try {
+                let args = event.data.args;
+                if (!isInitialized) {
+                    INIT_LAYOUT = args.layout_data;
+                    LIVE_DATA = args.live_data;
+                    elementsData = JSON.parse(JSON.stringify(INIT_LAYOUT.elements));
+                    rightOffset = INIT_LAYOUT.right_x_offset || 300;
+                    renderCanvas();
+                    isInitialized = true;
+                }
+                setFrameHeight(800);
+            } catch (e) {
+                document.body.innerHTML += "<div style='color:red;'>" + e.message + "</div>";
+                setFrameHeight(800);
+            }
+        }
+        
+        window.addEventListener("message", onMessage);
+
+        function renderCanvas() {
+            let orient = INIT_LAYOUT.orientation || 'portrait';
+            canvas.style.width = '400px';
+            canvas.style.height = '600px';
+            divider.style.display = 'block';
+            divider.style.left = '0px';
+            divider.style.top = rightOffset + 'px';
+            divider.style.width = '100%';
+            divider.style.height = '1px';
+            divider.style.borderTop = '2px dashed #bbb';
+            divider.style.borderLeft = 'none';
+
+            Array.from(canvas.children).forEach(c => {
+                if(c.id !== 'divider-line') c.remove();
+            });
+
+            elementsData.forEach(el => createElementNode(el, 0, false));
+            
+            if (rightOffset > 0) {
+                elementsData.forEach(el => createElementNode(el, rightOffset, true));
+            }
+            
+            updateToolbar();
+        }
+
+        function createElementNode(el, xOff, isGhost) {
+            let div = document.createElement('div');
+            div.className = 'element' + (isGhost ? ' ghost' : '') + (selectedId === el.id && !isGhost ? ' selected' : '');
+            if (isGhost) {
+                div.style.opacity = '0.3';
+                div.style.pointerEvents = 'none';
+            }
+            
+            let align = el.align || 'left';
+            let txt = String(LIVE_DATA[el.id] || el.text || el.id);
+            
+            if (el.type === 'text') {
+                let fontStr = (el.font || "2").toString();
+                let h = h_map[fontStr] || 20;
+                let w = w_map[fontStr] || 12;
+                div.style.fontSize = h + 'px';
+                div.style.lineHeight = (h + 4) + 'px';
+                
+                let longestLine = Math.max(...txt.split("\n").map(l => l.length));
+                let pxWidth = longestLine * w;
+                let xAdj = 0;
+                if(align === 'center') xAdj = - (pxWidth / 2);
+                if(align === 'right') xAdj = - pxWidth;
+                
+                // xOff is passed when drawing ghosts, but since we are vertical, xOff applies to Y!
+            div.style.left = (el.x + xAdj) + 'px';
+            div.style.top = (el.y + (isGhost ? rightOffset : 0)) + 'px';
+                div.style.textAlign = align;
+                div.innerHTML = txt.replace(/\n/g, '<br>');
+                
+                if (el.invert) {
+                    div.style.backgroundColor = 'black';
+                    div.style.color = 'white';
+                    
+                    let px = el.padX !== undefined ? el.padX : 0;
+                    let py = el.padY !== undefined ? el.padY : 0;
+                    
+                    div.style.padding = `${py}px ${px}px`;
+                    // Compensate for padding so text stays perfectly in place
+                    div.style.marginLeft = `-${px}px`;
+                    div.style.marginTop = `-${py}px`;
+                    
+                    div.style.display = 'inline-block';
+                    div.style.whiteSpace = 'nowrap';
+                    div.style.letterSpacing = '0px';
+                }
+            } else if (el.type === 'barcode') {
+                let thick = el.thickness || 2;
+                let bw = thick === 1 ? 90 : 160;
+                let bh = el.height || 50;
+                
+                let xAdj = 0;
+                if(align === 'center') xAdj = - (bw / 2);
+                if(align === 'right') xAdj = - bw;
+                
+                // xOff is passed when drawing ghosts, but since we are vertical, xOff applies to Y!
+            div.style.left = (el.x + xAdj) + 'px';
+            div.style.top = (el.y + (isGhost ? rightOffset : 0)) + 'px';
+                div.style.width = bw + 'px';
+                div.style.height = bh + 'px';
+                
+                let rot = el.rotation || 0;
+                if (rot !== 0) div.style.transform = `rotate(${rot}deg)`;
+                div.style.transformOrigin = "top left";
+                
+                let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                div.appendChild(svg);
+                try {
+                    JsBarcode(svg, txt, {
+                        width: thick,
+                        height: bh,
+                        displayValue: true,
+                        fontSize: 16,
+                        margin: 0
+                    });
+                } catch(e) {}
+            }
+
+            if (!isGhost) {
+                div.onmousedown = (e) => {
+                    e.stopPropagation();
+                    selectedId = el.id;
+                    isDragging = true;
+                    dragTarget = el;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    initialX = el.x;
+                    initialY = el.y;
+                    renderCanvas();
+                };
+                
+                ['nw', 'ne', 'se', 'sw'].forEach(pos => {
+                    let handle = document.createElement('div');
+                    handle.className = `handle ${pos}`;
+                    div.appendChild(handle);
+                });
+            }
+
+            canvas.appendChild(div);
+        }
+
+        canvas.onmousedown = () => {
+            selectedId = null;
+            renderCanvas();
+        };
+
+        window.onmousemove = (e) => {
+            if (!isDragging || !dragTarget) return;
+            let dx = e.clientX - startX;
+            let dy = e.clientY - startY;
+            dragTarget.x = Math.round(initialX + dx);
+            dragTarget.y = Math.round(initialY + dy);
+            renderCanvas();
+        };
+
+        window.onmouseup = () => {
+            isDragging = false;
+            dragTarget = null;
+        };
+
+        document.getElementById('btn-smaller').onclick = () => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(!el) return;
+            if(el.type === 'text') {
+                let f = parseInt(el.font || 2);
+                if(f > 1) el.font = (f - 1).toString();
+            } else {
+                el.height = Math.max(20, (el.height || 50) - 10);
+            }
+            renderCanvas();
+        };
+
+        document.getElementById('btn-larger').onclick = () => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(!el) return;
+            if(el.type === 'text') {
+                let f = parseInt(el.font || 2);
+                if(f < 5) el.font = (f + 1).toString();
+            } else {
+                el.height = Math.min(200, (el.height || 50) + 10);
+            }
+            renderCanvas();
+        };
+
+        ['left', 'center', 'right'].forEach(aln => {
+            document.getElementById('btn-align-' + aln).onclick = () => {
+                let el = elementsData.find(e => e.id === selectedId);
+                if(el) { el.align = aln; renderCanvas(); }
+            };
+        });
+
+
+        document.getElementById('btn-invert').onclick = () => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(el && el.type === 'text') {
+                el.invert = !el.invert;
+                renderCanvas();
+            }
+        };
+        
+        document.getElementById('pad-x').addEventListener('input', (e) => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(el && el.type === 'text') { el.padX = parseInt(e.target.value) || 0; renderCanvas(); }
+        });
+        document.getElementById('pad-y').addEventListener('input', (e) => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(el && el.type === 'text') { el.padY = parseInt(e.target.value) || 0; renderCanvas(); }
+        });
+
+        document.getElementById('text-edit').addEventListener('input', (e) => {
+            let el = elementsData.find(e => e.id === selectedId);
+            if(el && el.type === 'text') {
+                el.text = e.target.value; // Store override text
+                renderCanvas();
+            }
+        });
+
+        function updateToolbar() {
+            let el = elementsData.find(e => e.id === selectedId);
+            if (!el) {
+                document.getElementById('text-edit').value = '';
+                document.getElementById('text-edit').disabled = true;
+                document.getElementById('btn-invert').classList.remove('active');
+                document.getElementById('font-label').innerText = '-';
+                ['left','center','right'].forEach(a => document.getElementById('btn-align-'+a).classList.remove('active'));
+                return;
+            }
+            
+            if (el.type === 'text') {
+                document.getElementById('font-label').innerText = 'Font: ' + (el.font || '2');
+            } else {
+                document.getElementById('font-label').innerText = 'H: ' + (el.height || 50);
+            }
+            
+            ['left','center','right'].forEach(a => {
+                let btn = document.getElementById('btn-align-'+a);
+                if((el.align || 'left') === a) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            
+            if (el.type === 'text') {
+                let txt = el.text !== undefined ? el.text : (LIVE_DATA[el.id] || el.id);
+                let editBox = document.getElementById('text-edit');
+                editBox.disabled = false;
+                if (document.activeElement !== editBox) {
+                    editBox.value = txt;
+                }
+                if (el.invert) {
+                    document.getElementById('btn-invert').classList.add('active');
+                    document.getElementById('padding-controls').style.display = 'flex';
+                    document.getElementById('pad-x').value = el.padX !== undefined ? el.padX : 4;
+                    document.getElementById('pad-y').value = el.padY !== undefined ? el.padY : 4;
+                } else {
+                    document.getElementById('btn-invert').classList.remove('active');
+                    document.getElementById('padding-controls').style.display = 'none';
+                }
+            } else {
+                document.getElementById('padding-controls').style.display = 'none';
+                document.getElementById('text-edit').value = '';
+                document.getElementById('text-edit').disabled = true;
+                document.getElementById('btn-invert').classList.remove('active');
+            }
+        }
+
+        document.getElementById('btn-save').onclick = () => {
+            INIT_LAYOUT.elements = elementsData;
+            window.parent.postMessage({
+                isStreamlitMessage: true,
+                type: "streamlit:setComponentValue",
+                value: INIT_LAYOUT
+            }, "*");
+        };
+        
+        // Notify ready
+        window.parent.postMessage({
+            isStreamlitMessage: true,
+            type: "streamlit:componentReady",
+            apiVersion: 1
+        }, "*");
+    </script>
+</body>
+</html>
