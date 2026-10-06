@@ -174,7 +174,7 @@
                     INIT_LAYOUT = args.layout_data;
                     LIVE_DATA = args.live_data;
                     elementsData = JSON.parse(JSON.stringify(INIT_LAYOUT.elements));
-                    rightOffset = INIT_LAYOUT.right_x_offset || 300;
+                    rightOffset = INIT_LAYOUT.right_x_offset !== undefined ? INIT_LAYOUT.right_x_offset : 300;
                     renderCanvas();
                     isInitialized = true;
                 }
