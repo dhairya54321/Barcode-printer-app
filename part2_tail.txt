@@ -1,0 +1,90 @@
+st.subheader("4. Print Action")
+printers = get_printers()
+if not printers:
+    st.warning("No local printers found. Are you running on the server?")
+
+selected_printer = st.selectbox("Select Printer", printers) if printers else "TSC_RAW_PRINTER"
+quantity = st.number_input("Number of Sheets (Yields 2 stickers per sheet)", min_value=1, value=1)
+
+if st.button("🖨️ Print Labels", type="primary", use_container_width=True):
+    if selected_printer:
+        try:
+            tspl = "SIZE 75 mm, 50 mm\r\nGAP 2 mm, 0 mm\r\nDIRECTION 1\r\nCLS\r\n"
+            right_off = int(current_preset.get("right_x_offset", 300))
+            
+            for side in [0, 1]:
+                for el in current_preset["elements"]:
+                    txt = el.get("text") or live_data.get(el["id"], "")
+                    if el["id"] == "MRP": txt = txt.replace('₹', 'Rs.')
+                    
+                    if el["type"] == "text":
+                        h_map = {"1": 12, "2": 20, "3": 24, "4": 32, "5": 48}
+                        w_map = {"1": 8, "2": 12, "3": 14, "4": 24, "5": 32}
+                        char_w = w_map.get(str(el.get("font", "2")), 12)
+                        char_h = h_map.get(str(el.get("font", "2")), 20)
+                        line_height = char_h + 4
+                        align = el.get("align", "left")
+                        
+                        lines = str(txt).split("\n")
+                        for i, line in enumerate(lines):
+                            if line.strip():
+                                line_width = len(line.strip()) * char_w
+                                x_adj = 0
+                                if align == "center": x_adj = int(-(line_width / 2))
+                                elif align == "right": x_adj = int(-line_width)
+                                
+                                # ALWAYS rotate 90 degrees for Landscape preset!
+                                x_base = 300 if side == 0 else 600
+                                phys_x = int(x_base - el["y"] - (i * line_height))
+                                phys_y = int(el["x"] + x_adj)
+                                phys_x = max(0, phys_x)
+                                phys_y = max(0, phys_y)
+                                tspl += f'TEXT {phys_x},{phys_y},"{el.get("font","2")}",90,1,1,"{line.strip()}"\r\n'
+                                
+                                if el.get("invert"):
+                                    px = int(el.get("padX", 0))
+                                    py = int(el.get("padY", 0))
+                                    rev_x = int(phys_x - char_h - py)
+                                    rev_y = int(phys_y - px)
+                                    rev_w = int(char_h + (2 * py))
+                                    rev_h = int(line_width + (2 * px))
+                                    if rev_y < 0:
+                                        rev_h += rev_y
+                                        rev_y = 0
+                                    if rev_x < 0:
+                                        rev_w += rev_x
+                                        rev_x = 0
+                                    tspl += f'REVERSE {rev_x},{rev_y},{rev_w},{rev_h}\r\n'
+
+                    elif el["type"] == "barcode":
+                        thick = int(el.get("thickness", 2))
+                        bw = 90 if thick == 1 else 160
+                        align = el.get("align", "left")
+                        x_adj = 0
+                        if align == "center": x_adj = int(-(bw / 2))
+                        elif align == "right": x_adj = int(-bw)
+                        
+                        x_base = 300 if side == 0 else 600
+                        phys_x = int(x_base - el["y"])
+                        phys_y = int(el["x"] + x_adj)
+                        phys_rot = (int(el.get("rotation",0)) + 90) % 360
+                        tspl += f'BARCODE {phys_x},{phys_y},"128",{el.get("height",50)},1,{phys_rot},{thick},{thick},"{txt}"\r\n'
+            
+            mid_x = int(current_preset.get("right_x_offset", 300))
+            if mid_x > 0:
+                for dash_y in range(0, 400, 16):
+                    tspl += f"BAR {mid_x},{dash_y},2,8\r\n"
+            
+            tspl += f"PRINT 1, {quantity}\r\n"
+            
+            temp_file = "temp_print_job.prn"
+            with open(temp_file, "wb") as f:
+                f.write(tspl.encode('utf-8'))
+            process = subprocess.run(['lp', '-d', selected_printer, '-o', 'raw', temp_file], capture_output=True, text=True)
+            
+            if process.returncode == 0:
+                st.success("Successfully sent to printer!")
+            else:
+                st.error(f"Printing failed: {process.stderr}")
+        except Exception as e:
+            st.error(f"Error printing: {e}")
