@@ -62,7 +62,8 @@
 </head>
 <body>
     <div class="toolbar">
-        <button id="btn-save" style="background: #8a2be2; color: white; border: none;">Save Layout</button>
+        <button id="btn-save" style="background: #8a2be2; color: white; border: none;" title="Save for this item only">Save Layout</button>
+        <button id="btn-save-all" style="background: #28a745; color: white; border: none; margin-left: 5px;" title="Apply this layout to all items">Save for All Items</button>
         <div class="divider"></div>
         <button id="btn-smaller">A-</button>
         <span id="font-label" style="font-size: 14px; min-width: 60px; text-align: center;">Font: 2</span>
@@ -394,6 +395,17 @@
 
         document.getElementById('btn-save').onclick = () => {
             INIT_LAYOUT.elements = elementsData;
+            INIT_LAYOUT.save_mode = "item";
+            window.parent.postMessage({
+                isStreamlitMessage: true,
+                type: "streamlit:setComponentValue",
+                value: INIT_LAYOUT
+            }, "*");
+        };
+
+        document.getElementById('btn-save-all').onclick = () => {
+            INIT_LAYOUT.elements = elementsData;
+            INIT_LAYOUT.save_mode = "global";
             window.parent.postMessage({
                 isStreamlitMessage: true,
                 type: "streamlit:setComponentValue",

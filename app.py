@@ -80,12 +80,15 @@ def open_editor(base_name, current_item, orient, layout_data, live_data):
             with open('presets.json', 'r') as f:
                 current_presets = json.load(f)
             
-            if current_item:
-                save_key = f"Override_{orient}_{current_item}"
-                current_presets[save_key] = result
-            else:
+            # Check if user clicked 'Save for All Items'
+            save_mode = result.pop('save_mode', 'item')
+            
+            if save_mode == 'global' or not current_item:
                 save_key = base_name
-                current_presets[save_key] = result
+            else:
+                save_key = f"Override_{orient}_{current_item}"
+                
+            current_presets[save_key] = result
             
             with open('presets.json', 'w') as f:
                 json.dump(current_presets, f, indent=4)

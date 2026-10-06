@@ -963,5 +963,87 @@
             }
         ],
         "orientation": "portrait"
+    },
+    "Override_Landscape_Lilo Suko Chevdo250G": {
+        "layout_type": "landscape-2up",
+        "orientation": "landscape",
+        "right_x_offset": 300,
+        "elements": [
+            {
+                "id": "ProductName",
+                "type": "text",
+                "x": 53,
+                "y": 15,
+                "font": "3",
+                "invert": true,
+                "padX": 60,
+                "padY": 10
+            },
+            {
+                "id": "NetWeight",
+                "type": "text",
+                "x": 14,
+                "y": 75,
+                "font": "2"
+            },
+            {
+                "id": "MRP",
+                "type": "text",
+                "x": 13,
+                "y": 111,
+                "font": "2"
+            },
+            {
+                "id": "Batch",
+                "type": "text",
+                "x": 11,
+                "y": 149,
+                "font": "2"
+            },
+            {
+                "id": "Barcode",
+                "type": "barcode",
+                "x": 195,
+                "y": 68,
+                "height": 90,
+                "thickness": 2,
+                "rotation": 0
+            },
+            {
+                "id": "BestBeforeTitle",
+                "type": "text",
+                "x": 11,
+                "y": 190,
+                "font": "2"
+            },
+            {
+                "id": "BestBeforeDate",
+                "type": "text",
+                "x": 163,
+                "y": 191,
+                "font": "2"
+            },
+            {
+                "id": "ShopName1",
+                "type": "text",
+                "x": 22,
+                "y": 235,
+                "font": "2"
+            },
+            {
+                "id": "ShopName2",
+                "type": "text",
+                "x": 235,
+                "y": 235,
+                "font": "2"
+            },
+            {
+                "id": "Address",
+                "type": "text",
+                "x": 42,
+                "y": 264,
+                "font": "2"
+            }
+        ]
     }
 }
