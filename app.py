@@ -139,7 +139,20 @@ with tab_designer:
 
     with col1:
         st.subheader("1. Select Product")
-        item_names = df['Item Name'].astype(str).tolist()
+        
+        # Category Filter
+        if 'Category' in df.columns:
+            categories = sorted(list(set([str(c).strip() for c in df['Category'].dropna() if str(c).strip()])))
+            selected_category = st.selectbox("Filter by Category (Optional)", ["All Categories"] + categories)
+        else:
+            selected_category = "All Categories"
+            
+        if selected_category != "All Categories":
+            filtered_df = df[df['Category'].astype(str).str.strip() == selected_category]
+        else:
+            filtered_df = df
+            
+        item_names = filtered_df['Item Name'].dropna().astype(str).tolist()
         selected_item = st.selectbox("Search and Select Item", [""] + item_names)
 
         item_data = {"name": "", "price": "", "barcode": ""}
