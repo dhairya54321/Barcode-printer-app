@@ -89,7 +89,6 @@ def open_editor(base_name, current_item, orient, layout_data, live_data):
     if result is not None:
         try:
             import json
-import textwrap
             with open('presets.json', 'r') as f:
                 current_presets = json.load(f)
             
