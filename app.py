@@ -175,9 +175,15 @@ with tab_designer:
         barcode_input = st.text_input("Barcode Data", value=item_data.get("barcode", "").replace(".0", "") if pd.notnull(item_data.get("barcode")) else "")
 
         st.subheader("3. Sticker Orientation")
-        selected_orient = st.radio("Select Orientation", ["Landscape", "Portrait"], index=0, horizontal=True)
+        selected_orient = st.radio("Select Orientation", ["Landscape", "Portrait", "Mini 4-in-1"], index=0, horizontal=True)
 
-        base_preset_name = "Default Landscape" if selected_orient == "Landscape" else "Default Vertical (2-up)"
+        if selected_orient == "Landscape":
+            base_preset_name = "Default Landscape"
+        elif selected_orient == "Portrait":
+            base_preset_name = "Default Vertical (2-up)"
+        else:
+            base_preset_name = "Default Mini 4-in-1"
+            
         current_preset = presets.get(base_preset_name, {}).copy()
         selected_preset_name = base_preset_name
 
@@ -205,6 +211,12 @@ with tab_designer:
             "ShopName2": "Farsan Mart",
             "Address": "Ahmedabadi pole, Raopura."
         }
+        
+        for i in range(1, 5):
+            live_data[f"ProductName_{i}"] = name_input
+            live_data[f"NetWeight_{i}"] = f"Net wt: {weight_input}" if not weight_input.startswith("Net wt") else weight_input
+            live_data[f"MRP_{i}"] = mrp_input
+            live_data[f"Barcode_{i}"] = barcode_input
 
         if st.button("✏️ Edit Barcode Layout", type="primary"):
             st.session_state.editor_open = True

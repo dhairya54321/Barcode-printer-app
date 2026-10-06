@@ -1210,5 +1210,131 @@
                 "font": "2"
             }
         ]
+    },
+    "Default Mini 4-in-1": {
+        "layout_type": "2-up",
+        "right_x_offset": 300,
+        "elements": [
+            {
+                "id": "ProductName_1",
+                "type": "text",
+                "x": 10,
+                "y": 10,
+                "font": "2"
+            },
+            {
+                "id": "NetWeight_1",
+                "type": "text",
+                "x": 10,
+                "y": 35,
+                "font": "1"
+            },
+            {
+                "id": "MRP_1",
+                "type": "text",
+                "x": 10,
+                "y": 55,
+                "font": "1"
+            },
+            {
+                "id": "Barcode_1",
+                "type": "barcode",
+                "x": 140,
+                "y": 30,
+                "height": 30,
+                "thickness": 1,
+                "rotation": 0
+            },
+            {
+                "id": "ProductName_2",
+                "type": "text",
+                "x": 10,
+                "y": 100,
+                "font": "2"
+            },
+            {
+                "id": "NetWeight_2",
+                "type": "text",
+                "x": 10,
+                "y": 125,
+                "font": "1"
+            },
+            {
+                "id": "MRP_2",
+                "type": "text",
+                "x": 10,
+                "y": 145,
+                "font": "1"
+            },
+            {
+                "id": "Barcode_2",
+                "type": "barcode",
+                "x": 140,
+                "y": 120,
+                "height": 30,
+                "thickness": 1,
+                "rotation": 0
+            },
+            {
+                "id": "ProductName_3",
+                "type": "text",
+                "x": 10,
+                "y": 190,
+                "font": "2"
+            },
+            {
+                "id": "NetWeight_3",
+                "type": "text",
+                "x": 10,
+                "y": 215,
+                "font": "1"
+            },
+            {
+                "id": "MRP_3",
+                "type": "text",
+                "x": 10,
+                "y": 235,
+                "font": "1"
+            },
+            {
+                "id": "Barcode_3",
+                "type": "barcode",
+                "x": 140,
+                "y": 210,
+                "height": 30,
+                "thickness": 1,
+                "rotation": 0
+            },
+            {
+                "id": "ProductName_4",
+                "type": "text",
+                "x": 10,
+                "y": 280,
+                "font": "2"
+            },
+            {
+                "id": "NetWeight_4",
+                "type": "text",
+                "x": 10,
+                "y": 305,
+                "font": "1"
+            },
+            {
+                "id": "MRP_4",
+                "type": "text",
+                "x": 10,
+                "y": 325,
+                "font": "1"
+            },
+            {
+                "id": "Barcode_4",
+                "type": "barcode",
+                "x": 140,
+                "y": 300,
+                "height": 30,
+                "thickness": 1,
+                "rotation": 0
+            }
+        ]
     }
 }
