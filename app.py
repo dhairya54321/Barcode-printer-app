@@ -174,7 +174,32 @@ with tab_designer:
                 "barcode": str(row.get("Barcode", ""))
             }
 
-        st.subheader("2. Label Details")
+        st.subheader("2. Sticker Options")
+        selected_orient = st.radio("Select Layout", ["Landscape", "Mini 6-in-1", "Full Label"], index=0, horizontal=True)
+
+        if selected_orient == "Landscape":
+            base_preset_name = "Default Landscape"
+        elif selected_orient == "Full Label":
+            base_preset_name = "Default Full Label"
+        else:
+            base_preset_name = "Default Mini 6-in-1"
+            
+        current_preset = presets.get(base_preset_name, {}).copy()
+        selected_preset_name = base_preset_name
+
+        is_override = False
+        if selected_item:
+            override_key = f"Override_{selected_orient}_{selected_item}"
+            if override_key in presets:
+                current_preset = presets[override_key].copy()
+                selected_preset_name = override_key
+                is_override = True
+                st.success(f"Loaded custom saved layout for '{selected_item}'")
+
+        current_preset["orientation"] = selected_orient.lower()
+        current_preset["elements"] = [e for e in current_preset.get("elements", []) if e["id"] != "VegLogo"]
+
+        st.subheader("3. Label Details")
 
         default_name = item_data.get("name", "")
         saved_details = product_details.get(default_name, {})
@@ -225,30 +250,6 @@ with tab_designer:
 
         barcode_input = st.text_input("Barcode Data", value=item_data.get("barcode", "").replace(".0", "") if pd.notnull(item_data.get("barcode")) else "")
 
-        st.subheader("3. Sticker Options")
-        selected_orient = st.radio("Select Layout", ["Landscape", "Mini 6-in-1", "Full Label"], index=0, horizontal=True)
-
-        if selected_orient == "Landscape":
-            base_preset_name = "Default Landscape"
-        elif selected_orient == "Full Label":
-            base_preset_name = "Default Full Label"
-        else:
-            base_preset_name = "Default Mini 6-in-1"
-            
-        current_preset = presets.get(base_preset_name, {}).copy()
-        selected_preset_name = base_preset_name
-
-        is_override = False
-        if selected_item:
-            override_key = f"Override_{selected_orient}_{selected_item}"
-            if override_key in presets:
-                current_preset = presets[override_key].copy()
-                selected_preset_name = override_key
-                is_override = True
-                st.success(f"Loaded custom saved layout for '{selected_item}'")
-
-        current_preset["orientation"] = selected_orient.lower()
-        current_preset["elements"] = [e for e in current_preset.get("elements", []) if e["id"] != "VegLogo"]
 
         live_data = {
             "ProductName": name_input,
